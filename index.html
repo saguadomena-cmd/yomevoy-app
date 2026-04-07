@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Yo Me Voy Excursiones</title>
-<!-- Firebase compat CDN (works from local file) -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
@@ -82,20 +81,28 @@
   .bus-opt.selected { background: rgba(232,168,56,0.12); border-color: #E8A838; }
   .bus-opt-name { font-size: 15px; font-weight: bold; color: #F0EDE6; }
   .bus-opt-seats { font-size: 10px; color: #8B8680; margin-top: 2px; }
+  /* SEAT MAP */
   .bus-front { background: linear-gradient(180deg,#1A1D2E,#161820); border:1px solid rgba(232,168,56,0.2); border-radius: 16px 16px 4px 4px; padding: 8px 0 3px; text-align: center; font-size: 10px; color: #E8A838; letter-spacing: 3px; margin-bottom: 4px; }
-  .bus-body { background: #1A1D2E; border: 1px solid rgba(232,168,56,0.2); border-radius: 12px; padding: 12px 9px; max-height: 50vh; overflow-y: auto; }
+  .bus-body { background: #1A1D2E; border: 1px solid rgba(232,168,56,0.2); border-radius: 12px; padding: 12px 9px; max-height: 45vh; overflow-y: auto; }
   .seat-row { display: grid; grid-template-columns: 1fr 1fr 14px 1fr 1fr; gap: 4px; margin-bottom: 5px; }
-  .seat { border-radius: 6px; padding: 7px 2px; text-align: center; font-size: 10px; font-family: Georgia, serif; font-weight: bold; cursor: pointer; border: 1.5px solid; }
+  .seat { border-radius: 6px; padding: 7px 2px; text-align: center; font-size: 10px; font-family: Georgia, serif; font-weight: bold; cursor: pointer; border: 1.5px solid; transition: all 0.1s; }
   .seat.free { background: #161820; border-color: rgba(232,168,56,0.3); color: #F0EDE6; }
   .seat.occupied { background: #2A2020; border-color: #3A2A2A; color: #4A3A3A; cursor: not-allowed; }
   .seat.selected { background: #E8A838; border-color: #E8A838; color: #0F1117; }
   .seat-legend { display: flex; gap: 12px; justify-content: center; margin-top: 9px; font-size: 10px; color: #8B8680; }
+  /* SELECTED SEATS SUMMARY */
+  .seats-summary { background: rgba(232,168,56,0.08); border: 1.5px solid rgba(232,168,56,0.3); border-radius: 10px; padding: 10px 14px; margin-top: 10px; }
+  .seats-summary-title { font-size: 10px; color: #E8A838; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+  .seats-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .seat-chip { background: #E8A838; color: #0F1117; border-radius: 6px; padding: 4px 10px; font-size: 12px; font-weight: bold; font-family: Georgia, serif; }
+  /* SEÑAL */
   .senal-box { background: linear-gradient(135deg, rgba(232,168,56,0.12), rgba(232,168,56,0.04)); border: 1.5px solid rgba(232,168,56,0.4); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
   .senal-title { font-size: 10px; color: #E8A838; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
   .senal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .metalico-box { background: linear-gradient(135deg, rgba(34,197,94,0.12), rgba(34,197,94,0.04)); border: 1.5px solid rgba(34,197,94,0.4); border-radius: 10px; padding: 12px 14px; margin-top: 10px; }
   .metalico-title { font-size: 10px; color: #22c55e; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 4px; }
   .metalico-amount { font-size: 26px; font-weight: bold; color: #22c55e; font-family: Georgia, serif; }
+  /* SALES */
   .sale-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
   .filter-row { display: flex; gap: 6px; margin-bottom: 9px; overflow-x: auto; padding-bottom: 3px; scrollbar-width: none; }
   .filter-row::-webkit-scrollbar { display: none; }
@@ -150,7 +157,6 @@
 </div>
 
 <script>
-// ─── FIREBASE INIT ────────────────────────────────────────
 const firebaseConfig = {
   apiKey: "AIzaSyDI2vdwTHZxAbfw1HRim4S3QsH1yEygHtw",
   authDomain: "yo-me-voy-reservas.firebaseapp.com",
@@ -164,7 +170,6 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const salesRef = db.ref("sales");
 
-// ─── TRIPS DATA ───────────────────────────────────────────
 const TRIPS = [
   { id:1, dest:"Málaga — Costa del Sol",       date:"2025-04-04", day:"Sábado",  color:"#E84545", prices:{adulto:55,nino:45},  senalMin:20,  salidas:["Puente de Vallecas 01:30","Atocha 01:45","Plaza Elíptica 02:00"],    regreso:"01:00 desde Málaga",        info:"Semana Santa · Costa del Sol" },
   { id:2, dest:"Barcelona — Sagrada Família",  date:"2025-04-11", day:"Sábado",  color:"#3A7BD5", prices:{adulto:45,nino:null}, senalMin:30,  salidas:["Puente de Vallecas 01:30","NH Atocha 01:30","Plaza Elíptica 02:00"], regreso:"01:00 desde Barcelona",     info:"Sagrada Família · Montjuïc · Las Ramblas · Park Güell" },
@@ -176,48 +181,42 @@ const TRIPS = [
   { id:8, dest:"Peñíscola — Excursión 1 día",  date:"2025-06-28", day:"Domingo", color:"#06b6d4", prices:{adulto:55,nino:45},  senalMin:20,  salidas:["Puente de Vallecas 01:00","Atocha 01:30","Plaza Elíptica 01:45"],    regreso:"Incluido",                  info:"Castillo Papa Luna · Playa · Casco histórico" },
   { id:9, dest:"Tabarca — Isla",               date:"2025-07-04", day:"Sábado",  color:"#10b981", prices:{adulto:55,nino:50},  senalMin:20,  salidas:["Puente de Vallecas 01:00","Atocha 01:30","Plaza Elíptica 01:45"],    regreso:"Incluido",                  info:"Autobús + Barco · Aguas cristalinas" },
 ];
-const BUSES = [{id:1,name:"Bus 1",seats:80},{id:2,name:"Bus 2",seats:55}];
+
+// ✅ UPDATED BUS CAPACITIES
+const BUSES = [
+  { id:1, name:"Bus 1", seats:98 },
+  { id:2, name:"Bus 2", seats:83 },
+];
+
 const PAYMENTS = [{id:"Efectivo",icon:"💵"},{id:"Tarjeta",icon:"💳"},{id:"Bizum",icon:"📱"},{id:"Transferencia",icon:"🏦"}];
 
-// ─── STATE ────────────────────────────────────────────────
 var sales = {};
 var currentView = "dashboard";
-var selTrip = null, selBus = null, selSeat = null;
+var selTrip = null, selBus = null;
+var selSeats = []; // ✅ ARRAY para múltiples plazas
 var selPayment = "Bizum", selPriceType = "adulto";
 var filterTrip = "all", filterStatus = "all";
 var detailKey = null, tripsOpen = false;
 
-// ─── HELPERS ─────────────────────────────────────────────
 function getTrip(id){ return TRIPS.find(function(t){return t.id===id;}); }
 function getBus(id){ return BUSES.find(function(b){return b.id===id;}); }
-function salesArr(){ return Object.keys(sales).map(function(k){var s=sales[k];s._key=k;return s;}).sort(function(a,b){return (b.ts||0)-(a.ts||0);}); }
-function occupied(tripId,busId){ return salesArr().filter(function(s){return s.tripId===tripId&&s.busId===busId&&s.status!=="Cancelado";}).map(function(s){return s.seat;}); }
+function salesArr(){ return Object.keys(sales).map(function(k){var s=Object.assign({},sales[k]);s._key=k;return s;}).sort(function(a,b){return (b.ts||0)-(a.ts||0);}); }
+function occupied(tripId,busId){ return salesArr().filter(function(s){return s.tripId===tripId&&s.busId===busId&&s.status!=="Cancelado";}).reduce(function(a,s){ var seats=Array.isArray(s.seats)?s.seats:[s.seat]; return a.concat(seats); },[]); }
 function stColor(s){ return s==="Pagado"?"#22c55e":s==="Pendiente"?"#f59e0b":"#ef4444"; }
 function bdg(txt,col){ return '<span class="badge" style="background:'+col+'22;color:'+col+';border:1px solid '+col+'44">'+txt+'</span>'; }
 function fmtD(d){ var p=d.split("-"); return p[2]+"/"+p[1]+"/"+p[0]; }
 function setSyncDot(st){ var d=document.getElementById("syncDot"); if(d){d.className="sync-dot "+st;} }
 function updateRevenue(){ var t=salesArr().filter(function(s){return s.status!=="Cancelado";}).reduce(function(a,s){return a+(s.senal||0);},0); var el=document.getElementById("totalRevenue"); if(el)el.textContent="€"+t; }
-function toast(msg,type){
-  var t=document.createElement("div"); t.className="toast";
-  t.style.background=type==="error"?"#ef4444":"#22c55e"; t.textContent=msg;
-  document.body.appendChild(t);
-  setTimeout(function(){t.style.opacity="0";setTimeout(function(){t.remove();},400);},2800);
-}
+function toast(msg,type){ var t=document.createElement("div"); t.className="toast"; t.style.background=type==="error"?"#ef4444":"#22c55e"; t.textContent=msg; document.body.appendChild(t); setTimeout(function(){t.style.opacity="0";setTimeout(function(){t.remove();},400);},2800); }
 
-// ─── FIREBASE LISTENER ───────────────────────────────────
+// Firebase listener
 salesRef.on("value", function(snap){
   sales = snap.val() || {};
   setSyncDot("online");
   updateRevenue();
   render();
-}, function(err){
-  setSyncDot("error");
-  toast("Error de conexión con Firebase","error");
-  // Show dashboard anyway
-  render();
-});
+}, function(){ setSyncDot("error"); render(); });
 
-// ─── TRIPS ACCORDION ─────────────────────────────────────
 function buildTripsList(){
   var html="";
   TRIPS.forEach(function(t){
@@ -237,23 +236,19 @@ function toggleTrips(){
   document.getElementById("tripsArrow").classList.toggle("open",tripsOpen);
 }
 
+// ✅ pickTrip now goes directly to busSelect
 function pickTrip(id){
-  selTrip=getTrip(id); selBus=null; selSeat=null; selPriceType="adulto";
+  selTrip=getTrip(id); selBus=null; selSeats=[]; selPriceType="adulto";
   if(tripsOpen) toggleTrips();
-  showView("newSale");
+  showView("busSelect", true);
 }
 
-// ─── NAVIGATION ──────────────────────────────────────────
 function showView(view, hideNav){
   currentView=view;
   var nav=document.getElementById("mainNav");
   if(nav){
     nav.style.display=hideNav?"none":"flex";
-    if(!hideNav){
-      var btns=nav.querySelectorAll(".nav-btn");
-      var views=["dashboard","newSale","sales"];
-      btns.forEach(function(btn,i){ btn.classList.toggle("active",views[i]===view); });
-    }
+    if(!hideNav){ var btns=nav.querySelectorAll(".nav-btn"); ["dashboard","newSale","sales"].forEach(function(v,i){btns[i].classList.toggle("active",v===view);}); }
   }
   render(); updateRevenue();
 }
@@ -264,7 +259,7 @@ function render(){
   c.innerHTML=(map[currentView]||renderDashboard)();
 }
 
-// ─── DASHBOARD ────────────────────────────────────────────
+// DASHBOARD
 function renderDashboard(){
   var arr=salesArr();
   var totalSenal=arr.filter(function(s){return s.status!=="Cancelado";}).reduce(function(a,s){return a+(s.senal||0);},0);
@@ -293,7 +288,7 @@ function renderDashboard(){
   return html;
 }
 
-// ─── NEW SALE ─────────────────────────────────────────────
+// NEW SALE (trip selector)
 function renderNewSale(){
   var html='<button class="back-btn" onclick="showView(\'dashboard\')">← Volver</button>'
     +'<div class="section-title">Nueva Reserva</div>'
@@ -301,20 +296,18 @@ function renderNewSale(){
   TRIPS.forEach(function(t){
     var sel=selTrip&&selTrip.id===t.id;
     var cp=t.prices.nino?'<span style="font-size:10px;color:#8B8680"> / Niños €'+t.prices.nino+'</span>':"";
-    html+='<div class="tour-card" style="background:'+(sel?t.color+'20':'linear-gradient(135deg,#1A1D2E,#161820)')+';border-color:'+(sel?t.color:t.color+'30')+'" onclick="doSelTrip('+t.id+')">'
+    html+='<div class="tour-card" style="background:'+(sel?t.color+'20':'linear-gradient(135deg,#1A1D2E,#161820)')+';border-color:'+(sel?t.color:t.color+'30')+'" onclick="pickTrip('+t.id+')">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">'
       +'<div style="flex:1"><div class="tour-name">'+t.dest+'</div><div class="tour-meta">'+t.day+' '+fmtD(t.date)+'</div><div style="font-size:10px;color:#6B6660;margin-top:2px">'+t.info+'</div></div>'
       +'<div style="text-align:right;flex-shrink:0"><div style="font-size:16px;font-weight:bold;color:'+t.color+'">€'+t.prices.adulto+'</div>'+cp+'</div>'
       +'</div></div>';
   });
-  if(selTrip) html+='<button class="btn btn-gold" onclick="showView(\'busSelect\',true)">Seleccionar bus →</button>';
   return html;
 }
-function doSelTrip(id){ selTrip=selTrip&&selTrip.id===id?null:getTrip(id); selBus=null; selSeat=null; selPriceType="adulto"; render(); }
 
-// ─── BUS SELECT ───────────────────────────────────────────
+// BUS SELECT
 function renderBusSelect(){
-  var html='<button class="back-btn" onclick="showView(\'newSale\',true)">← Volver</button>'
+  var html='<button class="back-btn" onclick="showView(\'newSale\')">← Volver</button>'
     +'<div class="section-title">Seleccionar Bus</div>'
     +'<div style="font-size:11px;color:#8B8680;margin-bottom:14px">'+selTrip.dest+' — '+fmtD(selTrip.date)+'</div>'
     +'<div class="bus-selector">';
@@ -334,43 +327,76 @@ function renderBusSelect(){
   if(selBus) html+='<button class="btn btn-gold" onclick="showView(\'seatMap\',true)">Ver plazas de '+selBus.name+' →</button>';
   return html;
 }
-function doSelBus(id){ selBus=getBus(id); selSeat=null; render(); }
+function doSelBus(id){ selBus=getBus(id); selSeats=[]; render(); }
 
-// ─── SEAT MAP ─────────────────────────────────────────────
+// ✅ SEAT MAP — multiple selection
 function renderSeatMap(){
   var occ=occupied(selTrip.id,selBus.id);
   var total=selBus.seats;
   var rows=Math.ceil(total/4);
   var html='<button class="back-btn" onclick="showView(\'busSelect\',true)">← Volver</button>'
-    +'<div style="text-align:center;margin-bottom:13px">'
-    +'<div style="font-size:10px;color:#E8A838;letter-spacing:3px;text-transform:uppercase">Seleccionar Plaza</div>'
+    +'<div style="text-align:center;margin-bottom:10px">'
+    +'<div style="font-size:10px;color:#E8A838;letter-spacing:3px;text-transform:uppercase">Seleccionar Plazas</div>'
     +'<div style="font-size:14px;margin-top:2px">'+selTrip.dest+'</div>'
     +'<div style="font-size:10px;color:#8B8680">'+selBus.name+' · '+total+' plazas · '+occ.length+' ocupadas</div>'
-    +'</div><div class="bus-front">🚌 CONDUCTOR</div><div class="bus-body">';
+    +'<div style="font-size:10px;color:#E8A838;margin-top:3px">Puedes seleccionar varias plazas</div>'
+    +'</div>'
+    +'<div class="bus-front">🚌 CONDUCTOR</div>'
+    +'<div class="bus-body">';
   for(var r=0;r<rows;r++){
     html+='<div class="seat-row">';
-    for(var c=0;c<2;c++){var sn=r*4+c+1;if(sn>total){html+='<div></div>';continue;}var isO=occ.indexOf(sn)>=0,isS=selSeat===sn;html+='<div class="seat '+(isO?'occupied':isS?'selected':'free')+'" onclick="doSelSeat('+sn+','+isO+')">'+sn+'</div>';}
+    for(var c=0;c<2;c++){
+      var sn=r*4+c+1; if(sn>total){html+='<div></div>';continue;}
+      var isO=occ.indexOf(sn)>=0, isS=selSeats.indexOf(sn)>=0;
+      html+='<div class="seat '+(isO?'occupied':isS?'selected':'free')+'" onclick="doSelSeat('+sn+','+isO+')">'+sn+'</div>';
+    }
     html+='<div></div>';
-    for(var c2=2;c2<4;c2++){var sn2=r*4+c2+1;if(sn2>total){html+='<div></div>';continue;}var isO2=occ.indexOf(sn2)>=0,isS2=selSeat===sn2;html+='<div class="seat '+(isO2?'occupied':isS2?'selected':'free')+'" onclick="doSelSeat('+sn2+','+isO2+')">'+sn2+'</div>';}
+    for(var c2=2;c2<4;c2++){
+      var sn2=r*4+c2+1; if(sn2>total){html+='<div></div>';continue;}
+      var isO2=occ.indexOf(sn2)>=0, isS2=selSeats.indexOf(sn2)>=0;
+      html+='<div class="seat '+(isO2?'occupied':isS2?'selected':'free')+'" onclick="doSelSeat('+sn2+','+isO2+')">'+sn2+'</div>';
+    }
     html+='</div>';
   }
-  html+='</div><div class="seat-legend"><span>🟡 Selec.</span><span>⬛ Libre</span><span>🔴 Ocupado</span></div>';
-  if(selSeat) html+='<button class="btn btn-gold" onclick="showView(\'clientForm\',true)">Continuar — Plaza '+selSeat+'</button>';
+  html+='</div>'
+    +'<div class="seat-legend"><span>🟡 Selec.</span><span>⬛ Libre</span><span>🔴 Ocupado</span></div>';
+
+  // Selected seats summary
+  if(selSeats.length>0){
+    html+='<div class="seats-summary">'
+      +'<div class="seats-summary-title">✅ Plazas seleccionadas ('+selSeats.length+')</div>'
+      +'<div class="seats-chips">';
+    selSeats.sort(function(a,b){return a-b;}).forEach(function(s){ html+='<div class="seat-chip">'+s+'</div>'; });
+    html+='</div></div>'
+      +'<button class="btn btn-gold" onclick="showView(\'clientForm\',true)">Continuar con '+selSeats.length+' plaza'+(selSeats.length>1?'s':'')+' →</button>';
+  }
   return html;
 }
-function doSelSeat(n,isO){ if(isO)return; selSeat=selSeat===n?null:n; render(); }
 
-// ─── CLIENT FORM ──────────────────────────────────────────
+// ✅ Toggle seat in/out of selection array
+function doSelSeat(n,isO){
+  if(isO) return;
+  var idx=selSeats.indexOf(n);
+  if(idx>=0){ selSeats.splice(idx,1); } else { selSeats.push(n); }
+  render();
+}
+
+// CLIENT FORM
 function renderClientForm(){
   var t=selTrip;
   var hasChild=t.prices.nino!==null;
   var precio=selPriceType==="nino"&&t.prices.nino?t.prices.nino:t.prices.adulto;
+  var totalPrecio=precio*selSeats.length;
   var html='<button class="back-btn" onclick="showView(\'seatMap\',true)">← Volver</button>'
     +'<div class="section-title">Datos de la Reserva</div>'
     +'<div class="card" style="border-color:'+t.color+'44;margin-bottom:12px">'
     +'<div style="font-size:9px;color:#E8A838;letter-spacing:2px">RESUMEN</div>'
     +'<div style="font-size:14px;margin-top:2px">'+t.dest+'</div>'
-    +'<div style="font-size:10px;color:#8B8680">'+t.day+' '+fmtD(t.date)+' · '+selBus.name+' · Plaza '+selSeat+'</div>'
+    +'<div style="font-size:10px;color:#8B8680">'+t.day+' '+fmtD(t.date)+' · '+selBus.name+'</div>'
+    +'<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:5px">';
+  selSeats.sort(function(a,b){return a-b;}).forEach(function(s){ html+='<span class="seat-chip">Plaza '+s+'</span>'; });
+  html+='</div>'
+    +'<div style="font-size:11px;color:#E8A838;margin-top:8px;font-weight:bold">'+selSeats.length+' plaza'+(selSeats.length>1?'s':'')+' · €'+precio+' c/u · Total: €'+totalPrecio+'</div>'
     +'<div class="salidas-info">'+t.salidas.map(function(s){return '📍 '+s;}).join('<br>')+'</div>'
     +'</div>';
   if(hasChild){
@@ -387,14 +413,16 @@ function renderClientForm(){
     +'<div class="senal-box">'
     +'<div class="senal-title">💰 Mi señal — Importe pagado para reservar</div>'
     +'<div class="senal-row">'
-    +'<div><label class="label" style="color:#E8A838">Mi señal (€)</label><input class="input" id="fSenal" placeholder="'+t.senalMin+'" type="number" min="0" max="'+precio+'" oninput="calcMet('+precio+')" style="border-color:rgba(232,168,56,0.4)"></div>'
-    +'<div><label class="label" style="color:#22c55e">Resto metálico</label><div class="input" id="fMetalico" style="color:#22c55e;font-weight:bold;font-size:15px;border-color:rgba(34,197,94,0.3);background:#0a1a0f">€'+precio+'</div></div>'
+    +'<div><label class="label" style="color:#E8A838">Mi señal (€)</label>'
+    +'<input class="input" id="fSenal" placeholder="'+t.senalMin*selSeats.length+'" type="number" min="0" max="'+totalPrecio+'" oninput="calcMet('+totalPrecio+')" style="border-color:rgba(232,168,56,0.4)"></div>'
+    +'<div><label class="label" style="color:#22c55e">Resto metálico</label>'
+    +'<div class="input" id="fMetalico" style="color:#22c55e;font-weight:bold;font-size:15px;border-color:rgba(34,197,94,0.3);background:#0a1a0f">€'+totalPrecio+'</div></div>'
     +'</div>'
-    +'<div style="font-size:10px;color:#8B8680;margin-top:7px">Precio total: <strong style="color:#E8A838">€'+precio+'</strong> · Señal mínima: €'+t.senalMin+'</div>'
+    +'<div style="font-size:10px;color:#8B8680;margin-top:7px">Total: <strong style="color:#E8A838">€'+totalPrecio+'</strong> ('+selSeats.length+' plaza'+(selSeats.length>1?'s':', precio')+' × €'+precio+')</div>'
     +'</div>'
     +'<div class="form-group" style="margin-top:12px"><label class="label">Pago de la señal</label><div class="payment-grid">';
   PAYMENTS.forEach(function(m){ html+='<div class="payment-opt '+(selPayment===m.id?"selected":"")+'" onclick="doSelPay(\''+m.id+'\')">'+m.icon+' '+m.id+'</div>'; });
-  html+='</div></div><button class="btn btn-gold" onclick="confirmSale('+precio+')">✓ Confirmar reserva</button>';
+  html+='</div></div><button class="btn btn-gold" onclick="confirmSale('+totalPrecio+')">✓ Confirmar reserva</button>';
   return html;
 }
 
@@ -404,41 +432,45 @@ function doSelPT(type){
   var vals={}; ["fClient","fPhone","fEmail","fSenal"].forEach(function(id){var el=document.getElementById(id);if(el)vals[id]=el.value;});
   selPriceType=type; render();
   Object.keys(vals).forEach(function(id){var el=document.getElementById(id);if(el)el.value=vals[id];});
-  var p=selPriceType==="nino"&&selTrip.prices.nino?selTrip.prices.nino:selTrip.prices.adulto; calcMet(p);
+  var p=selPriceType==="nino"&&selTrip.prices.nino?selTrip.prices.nino*selSeats.length:selTrip.prices.adulto*selSeats.length; calcMet(p);
 }
 
 function doSelPay(p){
   var vals={}; ["fClient","fPhone","fEmail","fSenal"].forEach(function(id){var el=document.getElementById(id);if(el)vals[id]=el.value;});
   selPayment=p; render();
   Object.keys(vals).forEach(function(id){var el=document.getElementById(id);if(el)el.value=vals[id];});
-  var precio=selPriceType==="nino"&&selTrip.prices.nino?selTrip.prices.nino:selTrip.prices.adulto; calcMet(precio);
+  var precio=selPriceType==="nino"&&selTrip.prices.nino?selTrip.prices.nino*selSeats.length:selTrip.prices.adulto*selSeats.length; calcMet(precio);
 }
 
-function confirmSale(precio){
+function confirmSale(totalPrecio){
   var client=document.getElementById("fClient").value.trim();
   var phone=document.getElementById("fPhone").value.trim();
   var email=document.getElementById("fEmail").value.trim();
   var senal=parseFloat(document.getElementById("fSenal").value)||0;
   if(!client||!phone){ toast("Completa nombre y teléfono","error"); return; }
-  var metalico=Math.max(0,precio-senal);
+  if(selSeats.length===0){ toast("Selecciona al menos una plaza","error"); return; }
+  var metalico=Math.max(0,totalPrecio-senal);
   setSyncDot("syncing");
   salesRef.push({
-    tripId:selTrip.id, busId:selBus.id, seat:selSeat,
+    tripId:selTrip.id, busId:selBus.id,
+    seats:selSeats.slice(), // ✅ array of seats
+    seat:selSeats[0], // backwards compat
+    numSeats:selSeats.length,
     client:client, phone:phone, email:email,
-    payment:selPayment, senal:senal, metalico:metalico, total:precio,
+    payment:selPayment, senal:senal, metalico:metalico, total:totalPrecio,
     priceType:selPriceType,
-    status:senal>=precio?"Pagado":"Pendiente",
+    status:senal>=totalPrecio?"Pagado":"Pendiente",
     date:new Date().toISOString().split("T")[0],
     ts:Date.now()
   }).then(function(){
     setSyncDot("online");
-    toast("¡Reserva guardada! ✅");
-    selSeat=null; selTrip=null; selBus=null; selPriceType="adulto";
+    toast("¡"+selSeats.length+" plaza"+(selSeats.length>1?"s":"")+" reservada"+(selSeats.length>1?"s":"")+"! ✅");
+    selSeats=[]; selTrip=null; selBus=null; selPriceType="adulto";
     showView("dashboard");
   }).catch(function(){ setSyncDot("error"); toast("Error al guardar","error"); });
 }
 
-// ─── SALES LIST ───────────────────────────────────────────
+// SALES LIST
 function renderSales(){
   var arr=salesArr().filter(function(s){
     var tm=filterTrip==="all"||s.tripId===parseInt(filterTrip);
@@ -447,19 +479,24 @@ function renderSales(){
   });
   var html='<div class="section-title">Historial de Reservas</div>'
     +'<div class="filter-row"><div class="filter-chip '+(filterTrip==="all"?"on":"off")+'" onclick="setFT(\'all\')">TODAS</div>';
-  TRIPS.forEach(function(t){ var s=t.dest.split("—")[0].trim().split(" ")[0]; html+='<div class="filter-chip '+(filterTrip==t.id?"on":"off")+'" onclick="setFT(\''+t.id+'\')">'+s+'</div>'; });
+  TRIPS.forEach(function(t){ var sh=t.dest.split("—")[0].trim().split(" ")[0]; html+='<div class="filter-chip '+(filterTrip==t.id?"on":"off")+'" onclick="setFT(\''+t.id+'\')">'+sh+'</div>'; });
   html+='</div><div class="filter-row">';
   ["all","Pagado","Pendiente","Cancelado"].forEach(function(s){ html+='<div class="filter-chip '+(filterStatus===s?"on":"off")+'" onclick="setFS(\''+s+'\')">'+(s==="all"?"TODOS":s.toUpperCase())+'</div>'; });
   html+='</div>';
   if(!arr.length){ html+='<div class="empty">Sin reservas para este filtro</div>'; return html; }
   arr.forEach(function(s){
     var t=getTrip(s.tripId), b=getBus(s.busId);
-    var shortId=s._key.substr(-6).toUpperCase();
+    var seats=Array.isArray(s.seats)?s.seats:[s.seat];
+    var seatsLabel=seats.length>1?"Plazas "+seats.sort(function(a,b){return a-b;}).join(", "):"Plaza "+seats[0];
     html+='<div class="sale-row" onclick="openDetail(\''+s._key+'\')">'
       +'<div style="flex:1">'
-      +'<div style="display:flex;gap:7px;align-items:center;margin-bottom:2px"><span style="font-size:11px;color:#E8A838;font-family:monospace">#'+shortId+'</span>'+bdg(s.status,stColor(s.status))+bdg(s.priceType==="nino"?"Niño":"Adulto","#6B6660")+'</div>'
+      +'<div style="display:flex;gap:7px;align-items:center;margin-bottom:2px">'
+      +'<span style="font-size:11px;color:#E8A838;font-family:monospace">#'+s._key.substr(-6).toUpperCase()+'</span>'
+      +bdg(s.status,stColor(s.status))
+      +bdg(seats.length+'pax',"#6B6660")
+      +'</div>'
       +'<div style="font-size:13px;color:#F0EDE6">'+s.client+'</div>'
-      +'<div style="font-size:10px;color:#6B6660">'+t.dest.split("—")[0].trim()+' · '+b.name+' · Plaza '+s.seat+'</div>'
+      +'<div style="font-size:10px;color:#6B6660">'+t.dest.split("—")[0].trim()+' · '+b.name+' · '+seatsLabel+'</div>'
       +'</div>'
       +'<div style="text-align:right;flex-shrink:0">'
       +'<div style="font-size:11px;color:#E8A838">Señal: €'+s.senal+'</div>'
@@ -469,30 +506,32 @@ function renderSales(){
   });
   return html;
 }
+
 function setFT(v){ filterTrip=v; render(); }
 function setFS(v){ filterStatus=v; render(); }
 function openDetail(key){ detailKey=key; showView("detail",true); }
 
-// ─── DETAIL ───────────────────────────────────────────────
+// DETAIL
 function renderDetail(){
   var s=sales[detailKey]; if(!s) return "";
   var t=getTrip(s.tripId), b=getBus(s.busId);
-  var shortId=detailKey.substr(-6).toUpperCase();
+  var seats=Array.isArray(s.seats)?s.seats:[s.seat];
+  var seatsLabel=seats.sort(function(a,b){return a-b;}).join(", ");
   var html='<button class="back-btn" onclick="showView(\'sales\')">← Volver</button>'
     +'<div class="card" style="border-color:'+t.color+'44">'
     +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
-    +'<span style="font-family:monospace;font-size:12px;color:#E8A838;letter-spacing:2px">#'+shortId+'</span>'
-    +'<div style="display:flex;gap:5px">'+bdg(s.status,stColor(s.status))+bdg(s.priceType==="nino"?"Niño":"Adulto","#6B6660")+'</div></div>'
+    +'<span style="font-family:monospace;font-size:12px;color:#E8A838;letter-spacing:2px">#'+detailKey.substr(-6).toUpperCase()+'</span>'
+    +'<div style="display:flex;gap:5px">'+bdg(s.status,stColor(s.status))+bdg(seats.length+' pax',"#6B6660")+'</div></div>'
     +'<div style="font-size:18px;margin-bottom:2px">'+s.client+'</div>'
     +'<div style="font-size:11px;color:#8B8680;margin-bottom:10px">📞 '+s.phone+(s.email?' &nbsp;✉ '+s.email:'')+'</div>'
     +'<div class="divider"></div>'
     +'<div class="detail-grid">'
     +'<div><div class="detail-key">Destino</div><div class="detail-val">'+t.dest.split("—")[0].trim()+'</div></div>'
     +'<div><div class="detail-key">Fecha</div><div class="detail-val">'+t.day+' '+fmtD(t.date)+'</div></div>'
-    +'<div><div class="detail-key">Bus / Plaza</div><div class="detail-val">'+b.name+' · Nº'+s.seat+'</div></div>'
+    +'<div><div class="detail-key">Bus</div><div class="detail-val">'+b.name+'</div></div>'
+    +'<div><div class="detail-key">Plaza'+(seats.length>1?'s':'')+'</div><div class="detail-val">'+seatsLabel+'</div></div>'
     +'<div><div class="detail-key">Precio total</div><div class="detail-val">€'+s.total+'</div></div>'
     +'<div><div class="detail-key">Pago señal</div><div class="detail-val">'+s.payment+'</div></div>'
-    +'<div><div class="detail-key">Fecha reserva</div><div class="detail-val">'+s.date+'</div></div>'
     +'</div>'
     +'<div class="divider"></div>'
     +'<div class="salidas-info">'+t.salidas.map(function(x){return '📍 '+x;}).join('<br>')+(t.regreso?'<br>🔄 Regreso: '+t.regreso:'')+'</div>'
@@ -524,7 +563,6 @@ function updStatus(key,status){
   }).catch(function(){ toast("Error","error"); });
 }
 
-// ─── INIT ─────────────────────────────────────────────────
 buildTripsList();
 </script>
 </body>
