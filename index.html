@@ -740,7 +740,7 @@ function renderSeatMap(){
     +'</div>';
   if(selSeats.length>0){
     html+='<div class="selected-seats-box">'
-      +'<div class="selected-seats-title">✅ '+selSeats.length+' plaza'+(selSeats.length>1?"s")+" seleccionada"+(selSeats.length>1?"s")+'</div>'
+      +'<div class="selected-seats-title">✅ '+selSeats.length+' plaza'+(selSeats.length>1?"s":"")+" seleccionada"+(selSeats.length>1?"s":"")+'</div>'
       +'<div class="seats-chips">';
     selSeats.slice().sort(function(a,b){return a-b;}).forEach(function(s){html+='<div class="seat-chip">'+s+'</div>';});
     html+='</div></div>'
