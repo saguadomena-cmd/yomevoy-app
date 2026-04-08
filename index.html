@@ -4,223 +4,522 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Yo Me Voy Excursiones</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Righteous&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Georgia, 'Times New Roman', serif; background: #0F1117; color: #F0EDE6; min-height: 100vh; display: flex; justify-content: center; }
-  .app { width: 100%; max-width: 430px; min-height: 100vh; }
+:root {
+  --sun: #FF6B35;
+  --sky: #00B4D8;
+  --sea: #0077B6;
+  --sand: #FFD166;
+  --lime: #06D6A0;
+  --rose: #EF476F;
+  --white: #FFFFFF;
+  --soft: #F8FAFF;
+  --gray: #64748B;
+  --dark: #1E293B;
+  --card-bg: #FFFFFF;
+  --page-bg: #F0F4FF;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--page-bg);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+}
+.app { width: 100%; max-width: 430px; min-height: 100vh; position: relative; }
 
-  /* HEADER */
-  .header { background: linear-gradient(135deg, #1A1D2E 0%, #0F1117 100%); border-bottom: 1px solid rgba(232,168,56,0.2); position: sticky; top: 0; z-index: 50; }
-  .header-top { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 0; }
-  .brand { display: flex; align-items: center; gap: 8px; }
-  .brand-icon { font-size: 20px; }
-  .brand-text .logo { font-size: 9px; letter-spacing: 3px; color: #E8A838; text-transform: uppercase; }
-  .brand-text .app-title { font-size: 16px; font-weight: bold; color: #F0EDE6; line-height: 1.1; }
-  .header-right { text-align: right; }
-  .revenue-num { font-size: 17px; font-weight: bold; color: #E8A838; }
-  .revenue-label { font-size: 8px; color: #6B6660; letter-spacing: 2px; text-transform: uppercase; }
-  .sync-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #6B6660; margin-left: 5px; vertical-align: middle; }
-  .sync-dot.online { background: #22c55e; }
-  .sync-dot.syncing { background: #f59e0b; animation: pulse 0.8s infinite; }
-  .sync-dot.error { background: #ef4444; }
-  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+/* ── HEADER ─────────────────────────────────── */
+.header {
+  background: linear-gradient(135deg, var(--sun) 0%, #FF8C42 50%, var(--sand) 100%);
+  padding: 0;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 4px 20px rgba(255,107,53,0.3);
+}
+.header-main {
+  padding: 16px 16px 12px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.brand-row { display: flex; align-items: center; gap: 10px; }
+.brand-logo {
+  width: 42px; height: 42px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  backdrop-filter: blur(10px);
+}
+.brand-name { font-family: 'Righteous', cursive; font-size: 18px; color: white; line-height: 1; }
+.brand-sub { font-size: 10px; color: rgba(255,255,255,0.85); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+.header-stats {
+  background: rgba(255,255,255,0.22);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 8px 14px;
+  text-align: right;
+}
+.stat-big { font-family: 'Righteous', cursive; font-size: 20px; color: white; line-height: 1; }
+.stat-small { font-size: 9px; color: rgba(255,255,255,0.85); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
 
-  /* SELLER BAR */
-  .seller-bar { display: flex; gap: 0; border-top: 1px solid rgba(232,168,56,0.15); }
-  .seller-btn { flex: 1; padding: 8px 4px; background: none; border: none; color: #6B6660; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; font-family: Georgia, serif; border-top: 2px solid transparent; transition: all 0.2s; }
-  .seller-btn.active { color: #E8A838; border-top: 2px solid #E8A838; background: rgba(232,168,56,0.05); }
+/* SYNC */
+.sync-pill {
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 20px; padding: 3px 10px;
+  font-size: 10px; color: white; font-weight: 700;
+}
+.sync-dot { width: 7px; height: 7px; border-radius: 50%; background: white; }
+.sync-dot.online { background: var(--lime); box-shadow: 0 0 6px var(--lime); }
+.sync-dot.syncing { background: var(--sand); animation: blink .7s infinite; }
+.sync-dot.error { background: var(--rose); }
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
-  /* TRIPS ACCORDION */
-  .trips-accordion { border-top: 1px solid rgba(232,168,56,0.15); }
-  .trips-toggle { width: 100%; background: rgba(232,168,56,0.04); border: none; color: #F0EDE6; padding: 9px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-family: Georgia, serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
-  .arrow { color: #E8A838; font-size: 10px; transition: transform 0.3s; display: inline-block; }
-  .arrow.open { transform: rotate(180deg); }
-  .trips-list { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
-  .trips-list.open { max-height: 800px; overflow-y: auto; }
-  .trip-item { padding: 9px 16px; border-top: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; align-items: center; cursor: pointer; gap: 8px; }
-  .trip-item:active { background: rgba(232,168,56,0.06); }
-  .trip-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-  .trip-dest { font-size: 12px; color: #F0EDE6; }
-  .trip-date { font-size: 10px; color: #8B8680; margin-top: 1px; }
-  .trip-price-main { font-size: 12px; font-weight: bold; color: #E8A838; }
-  .trip-price-child { font-size: 10px; color: #8B8680; }
+/* SELLER TABS */
+.seller-tabs {
+  display: flex; gap: 6px; padding: 8px 14px;
+}
+.seller-tab {
+  flex: 1; padding: 7px 6px; border: none; border-radius: 20px;
+  font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 800;
+  cursor: pointer; transition: all .2s;
+  background: rgba(255,255,255,0.2); color: rgba(255,255,255,0.85);
+}
+.seller-tab.active {
+  background: white; color: var(--sun); box-shadow: 0 2px 10px rgba(0,0,0,.15);
+}
 
-  /* NAV */
-  .nav { display: flex; border-top: 1px solid rgba(232,168,56,0.15); }
-  .nav-btn { flex: 1; padding: 9px 2px; background: none; border: none; color: #6B6660; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border-top: 2px solid transparent; transition: all 0.2s; font-family: Georgia, serif; }
-  .nav-btn.active { color: #E8A838; border-top: 2px solid #E8A838; }
+/* TRIPS ACCORDION */
+.trips-accord {
+  background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255,255,255,0.2);
+}
+.trips-toggle-btn {
+  width: 100%; background: none; border: none; color: white;
+  padding: 10px 16px; display: flex; justify-content: space-between; align-items: center;
+  font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 800;
+  cursor: pointer; letter-spacing: .5px;
+}
+.trips-toggle-btn span:last-child { transition: transform .3s; }
+.trips-toggle-btn.open span:last-child { transform: rotate(180deg); }
+.trips-dropdown { max-height: 0; overflow: hidden; transition: max-height .35s ease; background: white; }
+.trips-dropdown.open { max-height: 600px; overflow-y: auto; }
+.trip-row {
+  padding: 11px 16px; display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid #F0F4FF; cursor: pointer; transition: background .15s;
+}
+.trip-row:active { background: #F8FAFF; }
+.trip-color-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.trip-row-dest { font-size: 13px; font-weight: 700; color: var(--dark); flex: 1; }
+.trip-row-date { font-size: 10px; color: var(--gray); font-weight: 600; }
+.trip-row-price { font-size: 14px; font-weight: 900; color: var(--sun); }
 
-  .content { padding: 14px 14px 100px; }
-  .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
-  .stat-card { border-radius: 12px; padding: 11px 12px; text-align: center; }
-  .stat-num { font-size: 20px; font-weight: bold; font-family: Georgia, serif; line-height: 1; }
-  .stat-label { font-size: 9px; color: #8B8680; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 3px; }
-  .section-title { font-size: 10px; color: #E8A838; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 9px; margin-top: 4px; }
-  .card { background: linear-gradient(135deg, #1A1D2E, #161820); border: 1px solid rgba(232,168,56,0.15); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
-  .divider { height: 1px; background: rgba(232,168,56,0.1); margin: 10px 0; }
-  .tour-card { border-radius: 12px; padding: 11px; margin-bottom: 8px; cursor: pointer; border: 1.5px solid; }
-  .tour-name { font-size: 13px; font-weight: bold; color: #F0EDE6; }
-  .tour-meta { font-size: 10px; color: #8B8680; margin-top: 2px; line-height: 1.5; }
-  .badge { display: inline-block; border-radius: 20px; padding: 2px 7px; font-size: 9px; letter-spacing: 1px; }
-  .progress-bar { background: rgba(255,255,255,0.05); border-radius: 4px; height: 3px; margin-top: 7px; }
-  .progress-fill { height: 3px; border-radius: 4px; }
-  .progress-label { font-size: 9px; color: #6B6660; margin-top: 2px; }
+/* NAV BAR */
+.nav-bar {
+  background: white; display: flex;
+  border-top: 2px solid #F0F4FF;
+}
+.nav-item {
+  flex: 1; padding: 10px 4px 8px; border: none; background: none;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  cursor: pointer; transition: all .2s; color: #94A3B8; font-family: 'Nunito', sans-serif;
+}
+.nav-item .nav-icon { font-size: 20px; transition: transform .2s; }
+.nav-item .nav-label { font-size: 9px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; }
+.nav-item.active { color: var(--sun); }
+.nav-item.active .nav-icon { transform: scale(1.15); }
 
-  /* DEPARTURE SELECTOR */
-  .departure-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; margin-bottom: 12px; }
-  .dep-opt { border-radius: 9px; padding: 10px 6px; text-align: center; cursor: pointer; border: 1.5px solid rgba(232,168,56,0.2); background: #0F1117; transition: all 0.15s; }
-  .dep-opt.selected { background: rgba(232,168,56,0.15); border-color: #E8A838; }
-  .dep-opt-icon { font-size: 18px; margin-bottom: 3px; }
-  .dep-opt-name { font-size: 10px; color: #F0EDE6; font-weight: bold; }
-  .dep-opt-time { font-size: 9px; color: #8B8680; margin-top: 1px; }
+/* ── CONTENT ────────────────────────────────── */
+.content { padding: 16px 14px 100px; animation: fadeIn .3s ease; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
-  /* PRICE TYPES */
-  .price-types { display: flex; gap: 8px; margin-bottom: 12px; }
-  .price-type-opt { flex: 1; border-radius: 8px; padding: 9px 6px; text-align: center; cursor: pointer; border: 1.5px solid rgba(232,168,56,0.2); background: #0F1117; }
-  .price-type-opt.selected { background: rgba(232,168,56,0.15); border-color: #E8A838; }
-  .price-type-name { font-size: 11px; color: #F0EDE6; }
-  .price-type-price { font-size: 15px; font-weight: bold; color: #E8A838; margin-top: 2px; }
-  .price-type-desc { font-size: 9px; color: #8B8680; margin-top: 1px; }
+/* SECTION HEADER */
+.sec-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 14px; margin-top: 6px;
+}
+.sec-icon { font-size: 20px; }
+.sec-title { font-size: 16px; font-weight: 900; color: var(--dark); }
+.sec-badge {
+  background: var(--sun); color: white; border-radius: 20px;
+  padding: 2px 8px; font-size: 10px; font-weight: 800; margin-left: auto;
+}
 
-  /* BUTTONS */
-  .btn { border: none; border-radius: 10px; padding: 12px 16px; font-size: 13px; font-weight: bold; cursor: pointer; width: 100%; letter-spacing: 1px; font-family: Georgia, serif; margin-top: 9px; }
-  .btn-gold { background: linear-gradient(135deg, #E8A838, #D4952A); color: #0F1117; }
-  .btn-green { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; }
-  .btn-red { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
-  .btn-amber { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
-  .btn-blue { background: linear-gradient(135deg, #3A7BD5, #2563eb); color: #fff; }
-  .btn-pdf { background: linear-gradient(135deg, #7B5EA7, #6d28d9); color: #fff; }
-  .back-btn { background: none; border: none; color: #E8A838; font-size: 11px; cursor: pointer; letter-spacing: 2px; text-transform: uppercase; padding: 5px 0; font-family: Georgia, serif; margin-bottom: 11px; display: block; }
+/* STAT CARDS */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+.stat-card {
+  border-radius: 16px; padding: 14px 14px 12px;
+  display: flex; flex-direction: column;
+  box-shadow: 0 4px 15px rgba(0,0,0,.08);
+  transition: transform .15s;
+  position: relative; overflow: hidden;
+}
+.stat-card::before {
+  content: attr(data-emoji);
+  position: absolute; right: -4px; bottom: -4px;
+  font-size: 44px; opacity: .15;
+}
+.stat-card:active { transform: scale(.97); }
+.stat-card-num { font-family: 'Righteous', cursive; font-size: 26px; color: white; line-height: 1; }
+.stat-card-label { font-size: 10px; color: rgba(255,255,255,.85); font-weight: 700; letter-spacing: .5px; text-transform: uppercase; margin-top: 4px; }
 
-  /* FORM */
-  .input { background: #0F1117; border: 1px solid rgba(232,168,56,0.25); border-radius: 8px; padding: 10px 12px; color: #F0EDE6; font-size: 14px; width: 100%; font-family: Georgia, serif; outline: none; }
-  .input:focus { border-color: #E8A838; }
-  .textarea { background: #0F1117; border: 1px solid rgba(232,168,56,0.25); border-radius: 8px; padding: 10px 12px; color: #F0EDE6; font-size: 13px; width: 100%; font-family: Georgia, serif; outline: none; resize: vertical; min-height: 70px; }
-  .textarea:focus { border-color: #E8A838; }
-  .label { font-size: 10px; color: #E8A838; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px; display: block; }
-  .form-group { margin-bottom: 11px; }
-  .payment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-  .payment-opt { border-radius: 8px; padding: 8px 8px; cursor: pointer; font-size: 11px; text-align: center; font-family: Georgia, serif; border: 1.5px solid rgba(232,168,56,0.2); background: #0F1117; color: #8B8680; }
-  .payment-opt.selected { background: rgba(232,168,56,0.15); border-color: #E8A838; color: #E8A838; }
+/* TRIP CARDS */
+.trip-card {
+  background: white; border-radius: 18px; padding: 14px;
+  margin-bottom: 12px; cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0,0,0,.06);
+  transition: all .2s; position: relative; overflow: hidden;
+  border: 2px solid transparent;
+}
+.trip-card:active { transform: scale(.98); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.trip-card-accent {
+  position: absolute; top: 0; left: 0; width: 5px; height: 100%;
+  border-radius: 2px 0 0 2px;
+}
+.trip-card-inner { padding-left: 10px; }
+.trip-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.trip-card-dest { font-size: 15px; font-weight: 900; color: var(--dark); }
+.trip-card-date { font-size: 11px; font-weight: 600; color: var(--gray); margin-top: 2px; }
+.trip-card-info { font-size: 10px; color: #94A3B8; margin-top: 3px; font-weight: 600; }
+.trip-card-prices { text-align: right; flex-shrink: 0; }
+.trip-card-price { font-family: 'Righteous', cursive; font-size: 20px; }
+.trip-card-child { font-size: 10px; color: var(--gray); font-weight: 600; }
+.trip-card-bar { background: #F0F4FF; border-radius: 20px; height: 6px; margin-top: 10px; overflow: hidden; }
+.trip-card-fill { height: 6px; border-radius: 20px; transition: width .5s; }
+.trip-card-stats { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+.trip-card-stat-txt { font-size: 10px; color: var(--gray); font-weight: 600; }
+.trip-card-badge {
+  border-radius: 20px; padding: 3px 10px;
+  font-size: 10px; font-weight: 800;
+}
 
-  /* BUS */
-  .bus-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-  .bus-opt { border-radius: 10px; padding: 12px; text-align: center; cursor: pointer; border: 1.5px solid rgba(232,168,56,0.2); background: #161820; }
-  .bus-opt.selected { background: rgba(232,168,56,0.12); border-color: #E8A838; }
-  .bus-opt-name { font-size: 14px; font-weight: bold; color: #F0EDE6; }
-  .bus-opt-seats { font-size: 10px; color: #8B8680; margin-top: 2px; }
+/* BUTTONS */
+.btn-primary {
+  background: linear-gradient(135deg, var(--sun), #FF8C42);
+  color: white; border: none; border-radius: 14px;
+  padding: 14px 20px; font-size: 15px; font-weight: 800;
+  font-family: 'Nunito', sans-serif; cursor: pointer;
+  width: 100%; margin-top: 12px;
+  box-shadow: 0 4px 15px rgba(255,107,53,.35);
+  transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-primary:active { transform: scale(.97); }
+.btn-secondary {
+  background: var(--soft); color: var(--dark); border: 2px solid #E2E8F0;
+  border-radius: 14px; padding: 12px 18px; font-size: 14px; font-weight: 800;
+  font-family: 'Nunito', sans-serif; cursor: pointer;
+  width: 100%; margin-top: 8px; transition: all .2s;
+}
+.btn-green { background: linear-gradient(135deg,var(--lime),#05B58A); color:white; border:none; border-radius:12px; padding:11px 14px; font-size:13px; font-weight:800; font-family:'Nunito',sans-serif; cursor:pointer; flex:1; transition:all .2s; box-shadow:0 3px 10px rgba(6,214,160,.3); }
+.btn-red { background: linear-gradient(135deg,var(--rose),#C13554); color:white; border:none; border-radius:12px; padding:11px 14px; font-size:13px; font-weight:800; font-family:'Nunito',sans-serif; cursor:pointer; flex:1; transition:all .2s; box-shadow:0 3px 10px rgba(239,71,111,.3); }
+.btn-amber { background: linear-gradient(135deg,var(--sand),#FFBA08); color:var(--dark); border:none; border-radius:12px; padding:11px 14px; font-size:13px; font-weight:800; font-family:'Nunito',sans-serif; cursor:pointer; flex:1; transition:all .2s; }
+.btn-purple { background: linear-gradient(135deg,#7C3AED,#A855F7); color:white; border:none; border-radius:12px; padding:11px 14px; font-size:13px; font-weight:800; font-family:'Nunito',sans-serif; cursor:pointer; flex:1; transition:all .2s; }
+.btn-sky { background: linear-gradient(135deg,var(--sky),var(--sea)); color:white; border:none; border-radius:12px; padding:11px 14px; font-size:13px; font-weight:800; font-family:'Nunito',sans-serif; cursor:pointer; flex:1; transition:all .2s; }
+.action-row { display: flex; gap: 7px; margin-top: 12px; }
 
-  /* SEATS */
-  .bus-front { background: linear-gradient(180deg,#1A1D2E,#161820); border:1px solid rgba(232,168,56,0.2); border-radius: 14px 14px 4px 4px; padding: 7px 0 3px; text-align: center; font-size: 9px; color: #E8A838; letter-spacing: 3px; margin-bottom: 3px; }
-  .bus-body { background: #1A1D2E; border: 1px solid rgba(232,168,56,0.2); border-radius: 10px; padding: 10px 8px; max-height: 42vh; overflow-y: auto; }
-  .seat-row { display: grid; grid-template-columns: 1fr 1fr 12px 1fr 1fr; gap: 4px; margin-bottom: 4px; }
-  .seat { border-radius: 5px; padding: 6px 2px; text-align: center; font-size: 9px; font-family: Georgia, serif; font-weight: bold; cursor: pointer; border: 1.5px solid; transition: all 0.1s; }
-  .seat.free { background: #161820; border-color: rgba(232,168,56,0.3); color: #F0EDE6; }
-  .seat.occupied { background: #2A2020; border-color: #3A2A2A; color: #4A3A3A; cursor: not-allowed; }
-  .seat.selected { background: #E8A838; border-color: #E8A838; color: #0F1117; }
-  .seat-legend { display: flex; gap: 10px; justify-content: center; margin-top: 8px; font-size: 9px; color: #8B8680; }
-  .seats-summary { background: rgba(232,168,56,0.08); border: 1.5px solid rgba(232,168,56,0.3); border-radius: 10px; padding: 9px 12px; margin-top: 9px; }
-  .seats-summary-title { font-size: 9px; color: #E8A838; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
-  .seats-chips { display: flex; flex-wrap: wrap; gap: 5px; }
-  .seat-chip { background: #E8A838; color: #0F1117; border-radius: 5px; padding: 3px 9px; font-size: 11px; font-weight: bold; font-family: Georgia, serif; }
+/* BACK BTN */
+.back-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: white; border: none; border-radius: 20px;
+  padding: 7px 14px; font-size: 13px; font-weight: 800;
+  font-family: 'Nunito', sans-serif; color: var(--dark);
+  cursor: pointer; margin-bottom: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
 
-  /* SEÑAL */
-  .senal-box { background: linear-gradient(135deg, rgba(232,168,56,0.12), rgba(232,168,56,0.04)); border: 1.5px solid rgba(232,168,56,0.4); border-radius: 10px; padding: 11px 13px; margin-bottom: 11px; }
-  .senal-title { font-size: 9px; color: #E8A838; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 7px; }
-  .senal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
-  .metalico-box { background: linear-gradient(135deg, rgba(34,197,94,0.12), rgba(34,197,94,0.04)); border: 1.5px solid rgba(34,197,94,0.4); border-radius: 10px; padding: 11px 13px; margin-top: 9px; }
-  .metalico-title { font-size: 9px; color: #22c55e; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 3px; }
-  .metalico-amount { font-size: 24px; font-weight: bold; color: #22c55e; font-family: Georgia, serif; }
+/* CARDS */
+.info-card {
+  background: white; border-radius: 16px; padding: 14px;
+  margin-bottom: 12px; box-shadow: 0 3px 12px rgba(0,0,0,.06);
+}
+.info-card-title { font-size: 10px; font-weight: 800; color: var(--gray); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+.divider { height: 1px; background: #F0F4FF; margin: 12px 0; }
 
-  /* SALES */
-  .sale-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
-  .filter-row { display: flex; gap: 5px; margin-bottom: 8px; overflow-x: auto; padding-bottom: 3px; scrollbar-width: none; }
-  .filter-row::-webkit-scrollbar { display: none; }
-  .filter-chip { white-space: nowrap; border-radius: 20px; padding: 4px 9px; font-size: 9px; cursor: pointer; letter-spacing: 1px; border: 1px solid; }
-  .filter-chip.on { background: rgba(232,168,56,0.15); border-color: #E8A838; color: #E8A838; }
-  .filter-chip.off { background: #1A1D2E; border-color: rgba(232,168,56,0.2); color: #6B6660; }
-  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 9px; }
-  .detail-key { font-size: 9px; color: #E8A838; letter-spacing: 1.5px; text-transform: uppercase; }
-  .detail-val { font-size: 12px; color: #F0EDE6; margin-top: 2px; }
-  .action-row { display: flex; gap: 6px; margin-top: 10px; }
-  .action-row .btn { margin-top: 0; }
+/* FORM ELEMENTS */
+.form-label { font-size: 12px; font-weight: 800; color: var(--dark); letter-spacing: .3px; margin-bottom: 7px; display: block; }
+.form-input {
+  background: var(--soft); border: 2px solid #E2E8F0;
+  border-radius: 12px; padding: 12px 14px; color: var(--dark);
+  font-size: 14px; width: 100%; font-family: 'Nunito', sans-serif;
+  font-weight: 600; outline: none; transition: border .2s;
+}
+.form-input:focus { border-color: var(--sun); background: white; }
+.form-textarea {
+  background: var(--soft); border: 2px solid #E2E8F0;
+  border-radius: 12px; padding: 12px 14px; color: var(--dark);
+  font-size: 13px; width: 100%; font-family: 'Nunito', sans-serif;
+  font-weight: 600; outline: none; resize: vertical; min-height: 75px;
+  transition: border .2s;
+}
+.form-textarea:focus { border-color: var(--sun); background: white; }
+.form-group { margin-bottom: 13px; }
 
-  /* PROFILE */
-  .profile-card { background: linear-gradient(135deg, #1A1D2E, #161820); border: 1px solid rgba(232,168,56,0.2); border-radius: 14px; padding: 16px; margin-bottom: 12px; text-align: center; }
-  .profile-avatar { font-size: 42px; margin-bottom: 6px; }
-  .profile-name { font-size: 20px; font-weight: bold; color: #F0EDE6; }
-  .profile-role { font-size: 10px; color: #E8A838; letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
-  .profile-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 14px; }
-  .profile-stat { background: rgba(232,168,56,0.06); border: 1px solid rgba(232,168,56,0.15); border-radius: 10px; padding: 10px 6px; text-align: center; }
-  .profile-stat-num { font-size: 18px; font-weight: bold; color: #E8A838; }
-  .profile-stat-label { font-size: 8px; color: #8B8680; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+/* OPTION GRIDS */
+.options-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.options-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.options-grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 7px; }
+.option-card {
+  background: var(--soft); border: 2.5px solid #E2E8F0;
+  border-radius: 13px; padding: 11px 8px; text-align: center;
+  cursor: pointer; transition: all .2s;
+}
+.option-card:active { transform: scale(.95); }
+.option-card.selected {
+  background: linear-gradient(135deg,#FFF5F0,#FFE8E0);
+  border-color: var(--sun);
+  box-shadow: 0 3px 10px rgba(255,107,53,.2);
+}
+.option-icon { font-size: 22px; margin-bottom: 4px; }
+.option-name { font-size: 11px; font-weight: 800; color: var(--dark); }
+.option-sub { font-size: 9px; color: var(--gray); font-weight: 600; margin-top: 1px; }
+.option-card.selected .option-name { color: var(--sun); }
 
-  /* SELLER BADGE */
-  .seller-tag-jose { background: rgba(58,123,213,0.2); color: #3A7BD5; border: 1px solid #3A7BD544; border-radius: 10px; padding: 1px 6px; font-size: 9px; }
-  .seller-tag-cris { background: rgba(123,94,167,0.2); color: #C084FC; border: 1px solid #C084FC44; border-radius: 10px; padding: 1px 6px; font-size: 9px; }
+/* BUS CARDS */
+.bus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.bus-card {
+  background: white; border: 2.5px solid #E2E8F0;
+  border-radius: 16px; padding: 16px 12px; text-align: center;
+  cursor: pointer; transition: all .2s;
+  box-shadow: 0 3px 10px rgba(0,0,0,.05);
+}
+.bus-card.selected {
+  border-color: var(--sun);
+  background: linear-gradient(135deg,#FFF5F0,#FFE8E0);
+  box-shadow: 0 4px 15px rgba(255,107,53,.25);
+}
+.bus-card:active { transform: scale(.97); }
+.bus-emoji { font-size: 32px; margin-bottom: 6px; }
+.bus-name { font-size: 16px; font-weight: 900; color: var(--dark); }
+.bus-seats { font-size: 11px; font-weight: 600; color: var(--gray); margin-top: 2px; }
+.bus-free { font-size: 12px; font-weight: 800; color: var(--lime); margin-top: 4px; }
+.bus-taken { font-size: 10px; font-weight: 700; color: var(--sun); }
 
-  /* MISC */
-  .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; z-index: 200; white-space: nowrap; font-family: Georgia, serif; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
-  .empty { text-align: center; color: #6B6660; padding: 32px; font-size: 13px; }
-  .salidas-info { font-size: 10px; color: #6B6660; line-height: 1.8; margin-top: 4px; }
-  .loading { text-align: center; padding: 50px 20px; color: #8B8680; font-size: 13px; }
-  .loading-spinner { font-size: 28px; animation: spin 1.2s linear infinite; display: block; margin-bottom: 12px; }
-  @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-  .obs-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 12px; margin-top: 6px; font-size: 11px; color: #8B8680; font-style: italic; }
+/* SEAT MAP */
+.seat-map-header { text-align: center; margin-bottom: 12px; }
+.seat-map-title { font-size: 15px; font-weight: 900; color: var(--dark); }
+.seat-map-sub { font-size: 11px; font-weight: 600; color: var(--gray); margin-top: 2px; }
+.seat-map-hint { font-size: 11px; font-weight: 700; color: var(--sun); margin-top: 3px; }
+.bus-visual-front {
+  background: linear-gradient(135deg, var(--sky), var(--sea));
+  border-radius: 20px 20px 6px 6px; padding: 9px;
+  text-align: center; font-size: 11px; font-weight: 800;
+  color: white; letter-spacing: 2px; margin-bottom: 3px;
+  box-shadow: 0 4px 12px rgba(0,119,182,.3);
+}
+.bus-visual-body {
+  background: white; border: 2px solid #E2E8F0;
+  border-radius: 6px 6px 16px 16px; padding: 12px 10px;
+  max-height: 44vh; overflow-y: auto;
+  box-shadow: 0 4px 15px rgba(0,0,0,.06);
+}
+.seat-row { display: grid; grid-template-columns: 1fr 1fr 18px 1fr 1fr; gap: 5px; margin-bottom: 5px; }
+.seat {
+  border-radius: 8px; padding: 8px 2px; text-align: center;
+  font-size: 10px; font-weight: 800; cursor: pointer;
+  border: 2px solid; transition: all .15s;
+  font-family: 'Nunito', sans-serif;
+}
+.seat.free { background: var(--soft); border-color: #CBD5E1; color: var(--gray); }
+.seat.free:active { background: #FFF5F0; border-color: var(--sun); }
+.seat.occupied { background: #FEE2E2; border-color: #FECACA; color: #FCA5A5; cursor: not-allowed; }
+.seat.selected { background: linear-gradient(135deg,var(--sun),#FF8C42); border-color: var(--sun); color: white; box-shadow: 0 2px 8px rgba(255,107,53,.4); transform: scale(1.05); }
+.seat-legend { display: flex; gap: 12px; justify-content: center; margin-top: 10px; font-size: 10px; font-weight: 700; color: var(--gray); }
+.seat-legend span { display: flex; align-items: center; gap: 4px; }
+
+/* SELECTED SEATS */
+.selected-seats-box {
+  background: linear-gradient(135deg,#FFF5F0,#FFE8E0);
+  border: 2px solid var(--sun); border-radius: 14px;
+  padding: 12px 14px; margin-top: 12px;
+}
+.selected-seats-title { font-size: 11px; font-weight: 800; color: var(--sun); margin-bottom: 8px; }
+.seats-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.seat-chip {
+  background: var(--sun); color: white; border-radius: 8px;
+  padding: 4px 10px; font-size: 12px; font-weight: 800;
+}
+
+/* PAYMENT BOX */
+.senal-card {
+  background: linear-gradient(135deg,#FFF9E6,#FFF3CC);
+  border: 2px solid var(--sand); border-radius: 16px;
+  padding: 14px; margin-bottom: 12px;
+}
+.senal-card-title { font-size: 11px; font-weight: 800; color: #B45309; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 10px; }
+.senal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.senal-amount { font-family: 'Righteous', cursive; font-size: 28px; color: #B45309; }
+.metalico-card {
+  background: linear-gradient(135deg,#ECFDF5,#D1FAE5);
+  border: 2px solid #6EE7B7; border-radius: 16px;
+  padding: 14px; margin-top: 10px;
+}
+.metalico-card-title { font-size: 11px; font-weight: 800; color: #065F46; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 4px; }
+.metalico-amount { font-family: 'Righteous', cursive; font-size: 32px; color: #059669; }
+
+/* SALES LIST */
+.sale-card {
+  background: white; border-radius: 16px; padding: 13px 14px;
+  margin-bottom: 10px; cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0,0,0,.06);
+  transition: all .15s; display: flex; align-items: center; gap: 12px;
+  border-left: 4px solid transparent;
+}
+.sale-card:active { transform: scale(.98); }
+.sale-card.pagado { border-left-color: var(--lime); }
+.sale-card.pendiente { border-left-color: var(--sand); }
+.sale-card.cancelado { border-left-color: var(--rose); opacity: .7; }
+.sale-avatar {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.sale-info { flex: 1; min-width: 0; }
+.sale-name { font-size: 14px; font-weight: 800; color: var(--dark); }
+.sale-dest { font-size: 11px; font-weight: 600; color: var(--gray); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sale-meta { display: flex; gap: 5px; align-items: center; margin-top: 4px; flex-wrap: wrap; }
+.sale-amounts { text-align: right; flex-shrink: 0; }
+.sale-senal { font-size: 13px; font-weight: 900; color: var(--sun); }
+.sale-resto { font-size: 11px; font-weight: 700; color: #059669; }
+
+/* BADGES */
+.badge {
+  display: inline-flex; align-items: center; gap: 3px;
+  border-radius: 20px; padding: 2px 8px;
+  font-size: 10px; font-weight: 800;
+}
+.badge-pagado { background: #DCFCE7; color: #16A34A; }
+.badge-pendiente { background: #FEF9C3; color: #CA8A04; }
+.badge-cancelado { background: #FEE2E2; color: #DC2626; }
+.badge-jose { background: #DBEAFE; color: #2563EB; }
+.badge-cris { background: #F3E8FF; color: #9333EA; }
+.badge-seats { background: #F0F4FF; color: var(--sea); }
+
+/* FILTERS */
+.filter-scroll { display: flex; gap: 7px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.filter-scroll::-webkit-scrollbar { display: none; }
+.filter-pill {
+  white-space: nowrap; border-radius: 20px; padding: 6px 13px;
+  font-size: 11px; font-weight: 800; cursor: pointer; border: none;
+  font-family: 'Nunito', sans-serif; transition: all .15s;
+  background: white; color: var(--gray);
+  box-shadow: 0 2px 6px rgba(0,0,0,.06);
+}
+.filter-pill.active { background: var(--sun); color: white; box-shadow: 0 3px 10px rgba(255,107,53,.3); }
+
+/* DETAIL PAGE */
+.detail-hero {
+  border-radius: 18px; padding: 18px;
+  margin-bottom: 12px; position: relative; overflow: hidden;
+  color: white;
+}
+.detail-hero::before {
+  content: ""; position: absolute; top: -20px; right: -20px;
+  width: 100px; height: 100px; border-radius: 50%;
+  background: rgba(255,255,255,.1);
+}
+.detail-localizador { font-size: 11px; font-weight: 800; opacity: .8; letter-spacing: 1px; }
+.detail-name { font-size: 22px; font-weight: 900; margin-top: 4px; }
+.detail-contact { font-size: 12px; font-weight: 600; opacity: .9; margin-top: 3px; }
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.detail-item { background: rgba(255,255,255,.15); border-radius: 10px; padding: 9px 11px; }
+.detail-item-key { font-size: 9px; font-weight: 800; opacity: .8; letter-spacing: 1px; text-transform: uppercase; }
+.detail-item-val { font-size: 13px; font-weight: 800; margin-top: 2px; }
+
+/* PROFILE */
+.profile-hero {
+  border-radius: 20px; padding: 22px 18px; margin-bottom: 14px;
+  text-align: center; color: white; position: relative; overflow: hidden;
+}
+.profile-hero::after { content:""; position:absolute; bottom:-30px; left:-30px; width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,.08); }
+.profile-avatar-big { font-size: 52px; margin-bottom: 8px; }
+.profile-hero-name { font-family: 'Righteous', cursive; font-size: 24px; }
+.profile-hero-role { font-size: 12px; font-weight: 700; opacity: .85; letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+.profile-stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 14px; }
+.profile-stat-card { background: rgba(255,255,255,.18); border-radius: 12px; padding: 10px 6px; text-align: center; }
+.profile-stat-num { font-family: 'Righteous', cursive; font-size: 20px; color: white; }
+.profile-stat-lbl { font-size: 9px; font-weight: 800; color: rgba(255,255,255,.8); letter-spacing: .5px; text-transform: uppercase; margin-top: 2px; }
+.recent-sale-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid #F0F4FF; }
+
+/* TOAST */
+.toast {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+  color: white; padding: 12px 22px; border-radius: 20px;
+  font-size: 13px; font-weight: 800; z-index: 300;
+  font-family: 'Nunito', sans-serif;
+  box-shadow: 0 6px 25px rgba(0,0,0,.2);
+  display: flex; align-items: center; gap: 8px;
+  animation: toastIn .3s ease;
+}
+@keyframes toastIn { from{transform:translateX(-50%) translateY(-20px);opacity:0} to{transform:translateX(-50%) translateY(0);opacity:1} }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--gray); }
+.empty-emoji { font-size: 48px; margin-bottom: 12px; }
+.empty-text { font-size: 15px; font-weight: 700; }
+.empty-sub { font-size: 12px; margin-top: 6px; }
+.obs-display { background: #F8FAFF; border-radius: 10px; padding: 10px 13px; font-size: 12px; font-weight: 600; color: var(--gray); font-style: italic; margin-top: 8px; border-left: 3px solid var(--sand); }
+.loading-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; }
+.loading-emoji { font-size: 48px; animation: bounce 1s infinite; margin-bottom: 16px; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.loading-text { font-size: 16px; font-weight: 800; color: var(--gray); }
+.loading-sub { font-size: 12px; font-weight: 600; color: #94A3B8; margin-top: 6px; }
 </style>
 </head>
 <body>
 <div class="app">
+  <!-- ── HEADER ── -->
   <div class="header">
-    <div class="header-top">
-      <div class="brand">
-        <div class="brand-icon">🚌</div>
-        <div class="brand-text">
-          <div class="logo">Yo Me Voy Excursiones</div>
-          <div class="app-title">Gestión de Reservas <span class="sync-dot syncing" id="syncDot"></span></div>
+    <div class="header-main">
+      <div class="brand-row">
+        <div class="brand-logo">🚌</div>
+        <div>
+          <div class="brand-name">Yo Me Voy</div>
+          <div class="brand-sub">Excursiones</div>
         </div>
       </div>
-      <div class="header-right">
-        <div class="revenue-num" id="totalRevenue">€0</div>
-        <div class="revenue-label">Total señales</div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px">
+        <div class="header-stats">
+          <div class="stat-big" id="totalRevenue">€0</div>
+          <div class="stat-small">Señales</div>
+        </div>
+        <div class="sync-pill"><div class="sync-dot syncing" id="syncDot"></div><span id="syncTxt">Conectando...</span></div>
       </div>
     </div>
-
-    <!-- SELLER BAR -->
-    <div class="seller-bar">
-      <button class="seller-btn active" id="sbAll" onclick="setSeller('all')">👥 Todos</button>
-      <button class="seller-btn" id="sbJose" onclick="setSeller('jose')">🔵 Jose Ariel</button>
-      <button class="seller-btn" id="sbCris" onclick="setSeller('cris')">🟣 Cris</button>
+    <!-- Seller tabs -->
+    <div class="seller-tabs">
+      <button class="seller-tab active" id="sbAll" onclick="setSeller('all')">👥 Todos</button>
+      <button class="seller-tab" id="sbJose" onclick="setSeller('jose')">🔵 Jose Ariel</button>
+      <button class="seller-tab" id="sbCris" onclick="setSeller('cris')">🟣 Cris</button>
     </div>
-
-    <!-- TRIPS ACCORDION -->
-    <div class="trips-accordion">
-      <button class="trips-toggle" onclick="toggleTrips()">
-        <span>🗺️ &nbsp;Viajes disponibles (9)</span>
-        <span class="arrow" id="tripsArrow">▼</span>
+    <!-- Trips accordion -->
+    <div class="trips-accord">
+      <button class="trips-toggle-btn" id="tripsToggleBtn" onclick="toggleTrips()">
+        <span>🗺️ Ver todos los viajes</span>
+        <span>▼</span>
       </button>
-      <div class="trips-list" id="tripsList"></div>
+      <div class="trips-dropdown" id="tripsDropdown"></div>
     </div>
-
-    <!-- NAV -->
-    <div class="nav" id="mainNav">
-      <button class="nav-btn active" onclick="showView('dashboard')">Panel</button>
-      <button class="nav-btn" onclick="showView('newSale')">Reservar</button>
-      <button class="nav-btn" onclick="showView('sales')">Reservas</button>
-      <button class="nav-btn" onclick="showView('profile')">Mi Perfil</button>
+    <!-- Nav -->
+    <div class="nav-bar" id="mainNav">
+      <button class="nav-item active" onclick="showView('dashboard')"><span class="nav-icon">🏠</span><span class="nav-label">Panel</span></button>
+      <button class="nav-item" onclick="showView('newSale')"><span class="nav-icon">➕</span><span class="nav-label">Reservar</span></button>
+      <button class="nav-item" onclick="showView('sales')"><span class="nav-icon">📋</span><span class="nav-label">Reservas</span></button>
+      <button class="nav-item" onclick="showView('profile')"><span class="nav-icon">👤</span><span class="nav-label">Perfil</span></button>
     </div>
   </div>
 
   <div class="content" id="content">
-    <div class="loading"><span class="loading-spinner">🔄</span>Conectando...<br><small style="font-size:11px;margin-top:8px;display:block">Necesitas conexión a internet</small></div>
+    <div class="loading-screen">
+      <div class="loading-emoji">🚌</div>
+      <div class="loading-text">Conectando con Firebase...</div>
+      <div class="loading-sub">Necesitas conexión a internet</div>
+    </div>
   </div>
 </div>
 
 <script>
-// ─── FIREBASE ─────────────────────────────────────────────
+// ── FIREBASE ──────────────────────────────────────────────
 const firebaseConfig = {
   apiKey: "AIzaSyDI2vdwTHZxAbfw1HRim4S3QsH1yEygHtw",
   authDomain: "yo-me-voy-reservas.firebaseapp.com",
@@ -234,245 +533,198 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const salesRef = db.ref("sales");
 
-// ─── DATA ─────────────────────────────────────────────────
+// ── DATA ──────────────────────────────────────────────────
 const TRIPS = [
-  { id:1, dest:"Málaga — Costa del Sol",       date:"2025-04-04", day:"Sábado",  color:"#E84545", prices:{adulto:55,nino:45},  senalMin:20,  salidas:{vallecas:"01:30",atocha:"01:45",eliptica:"02:00"}, regreso:"01:00 desde Málaga",        info:"Semana Santa · Costa del Sol" },
-  { id:2, dest:"Barcelona — Sagrada Família",  date:"2025-04-11", day:"Sábado",  color:"#3A7BD5", prices:{adulto:45,nino:null}, senalMin:30,  salidas:{vallecas:"01:30",atocha:"01:30",eliptica:"02:00"}, regreso:"01:00 desde Barcelona",     info:"Sagrada Família · Montjuïc · Las Ramblas" },
-  { id:3, dest:"Alicante — Playa",             date:"2025-05-02", day:"Sábado",  color:"#E8A838", prices:{adulto:45,nino:40},  senalMin:20,  salidas:{vallecas:"01:45",atocha:"02:00",eliptica:"01:30"}, regreso:"00:30 desde Alicante",      info:"Día completo de playa · Guía" },
-  { id:4, dest:"San Sebastián — Pintxos",      date:"2025-05-10", day:"Domingo", color:"#22c55e", prices:{adulto:55,nino:null}, senalMin:20,  salidas:{vallecas:"01:30",atocha:"01:45",eliptica:"02:00"}, regreso:"18:00 desde San Sebastián", info:"Pintxos · Monte Igueldo · Barca" },
-  { id:5, dest:"Tenerife — Escapada",          date:"2025-05-23", day:"Vie-Dom", color:"#7B5EA7", prices:{adulto:280,nino:null},senalMin:100, salidas:{vallecas:"Vuelo",atocha:"Vuelo",eliptica:"Vuelo"}, regreso:"25 de mayo",                info:"Hotel + Vuelo + Excursiones" },
-  { id:6, dest:"Benidorm — Apertura Verano",   date:"2025-06-20", day:"Sábado",  color:"#f59e0b", prices:{adulto:55,nino:45},  senalMin:20,  salidas:{vallecas:"01:00",atocha:"01:30",eliptica:"01:45"}, regreso:"Incluido",                  info:"Apertura Verano 2026 · Playa" },
-  { id:7, dest:"Benidorm — Apertura Verano",   date:"2025-06-21", day:"Domingo", color:"#f97316", prices:{adulto:55,nino:45},  senalMin:20,  salidas:{vallecas:"01:00",atocha:"01:30",eliptica:"01:45"}, regreso:"Incluido",                  info:"Apertura Verano 2026 · Playa" },
-  { id:8, dest:"Peñíscola — Excursión 1 día",  date:"2025-06-28", day:"Domingo", color:"#06b6d4", prices:{adulto:55,nino:45},  senalMin:20,  salidas:{vallecas:"01:00",atocha:"01:30",eliptica:"01:45"}, regreso:"Incluido",                  info:"Castillo Papa Luna · Playa" },
-  { id:9, dest:"Tabarca — Isla",               date:"2025-07-04", day:"Sábado",  color:"#10b981", prices:{adulto:55,nino:50},  senalMin:20,  salidas:{vallecas:"01:00",atocha:"01:30",eliptica:"01:45"}, regreso:"Incluido",                  info:"Autobús + Barco · Aguas cristalinas" },
+  {id:1,dest:"Málaga",sub:"Costa del Sol",date:"2025-04-04",day:"Sábado",emoji:"🌊",color:"#EF476F",prices:{adulto:55,nino:45},senalMin:20,salidas:{vallecas:"01:30",atocha:"01:45",eliptica:"02:00"},regreso:"01:00 desde Málaga",info:"Semana Santa · Costa del Sol"},
+  {id:2,dest:"Barcelona",sub:"Sagrada Família",date:"2025-04-11",day:"Sábado",emoji:"🏛️",color:"#3A7BD5",prices:{adulto:45,nino:null},senalMin:30,salidas:{vallecas:"01:30",atocha:"01:30",eliptica:"02:00"},regreso:"01:00 desde Barcelona",info:"Sagrada Família · Montjuïc · Las Ramblas"},
+  {id:3,dest:"Alicante",sub:"Día de playa",date:"2025-05-02",day:"Sábado",emoji:"🏖️",color:"#FF6B35",prices:{adulto:45,nino:40},senalMin:20,salidas:{vallecas:"01:45",atocha:"02:00",eliptica:"01:30"},regreso:"00:30 desde Alicante",info:"Día completo de playa · Guía"},
+  {id:4,dest:"San Sebastián",sub:"Ruta Pintxos",date:"2025-05-10",day:"Domingo",emoji:"🦞",color:"#06D6A0",prices:{adulto:55,nino:null},senalMin:20,salidas:{vallecas:"01:30",atocha:"01:45",eliptica:"02:00"},regreso:"18:00 desde San Sebastián",info:"Pintxos · Monte Igueldo · Barca"},
+  {id:5,dest:"Tenerife",sub:"Escapada 3 días",date:"2025-05-23",day:"Vie-Dom",emoji:"🌋",color:"#7C3AED",prices:{adulto:280,nino:null},senalMin:100,salidas:{vallecas:"Vuelo",atocha:"Vuelo",eliptica:"Vuelo"},regreso:"25 de mayo",info:"Hotel + Vuelo + Excursiones"},
+  {id:6,dest:"Benidorm",sub:"Apertura Verano · Sábado",date:"2025-06-20",day:"Sábado",emoji:"☀️",color:"#FFB703",prices:{adulto:55,nino:45},senalMin:20,salidas:{vallecas:"01:00",atocha:"01:30",eliptica:"01:45"},regreso:"Incluido",info:"Apertura Verano 2026 · Playa"},
+  {id:7,dest:"Benidorm",sub:"Apertura Verano · Domingo",date:"2025-06-21",day:"Domingo",emoji:"🌴",color:"#FB8500",prices:{adulto:55,nino:45},senalMin:20,salidas:{vallecas:"01:00",atocha:"01:30",eliptica:"01:45"},regreso:"Incluido",info:"Apertura Verano 2026 · Playa"},
+  {id:8,dest:"Peñíscola",sub:"Excursión 1 día",date:"2025-06-28",day:"Domingo",emoji:"🏰",color:"#00B4D8",prices:{adulto:55,nino:45},senalMin:20,salidas:{vallecas:"01:00",atocha:"01:30",eliptica:"01:45"},regreso:"Incluido",info:"Castillo Papa Luna · Playa"},
+  {id:9,dest:"Tabarca",sub:"Isla en barco",date:"2025-07-04",day:"Sábado",emoji:"⛵",color:"#06D6A0",prices:{adulto:55,nino:50},senalMin:20,salidas:{vallecas:"01:00",atocha:"01:30",eliptica:"01:45"},regreso:"Incluido",info:"Autobús + Barco · Aguas cristalinas"},
 ];
-
-const BUSES = [
-  { id:1, name:"Bus 1", seats:98 },
-  { id:2, name:"Bus 2", seats:83 },
-];
-
+const BUSES = [{id:1,name:"Bus 1",seats:98},{id:2,name:"Bus 2",seats:83}];
 const SELLERS = {
-  jose: { id:"jose", name:"Jose Ariel", emoji:"🔵", color:"#3A7BD5" },
-  cris: { id:"cris", name:"Cris",       emoji:"🟣", color:"#C084FC" },
+  jose:{id:"jose",name:"Jose Ariel",emoji:"🔵",color:"#2563EB",grad:"linear-gradient(135deg,#1D4ED8,#3B82F6)"},
+  cris:{id:"cris",name:"Cris",emoji:"🟣",color:"#9333EA",grad:"linear-gradient(135deg,#7C3AED,#A855F7)"}
 };
-
 const DEPARTURES = [
-  { id:"vallecas", name:"Vallecas",   icon:"🟠", full:"Puente de Vallecas" },
-  { id:"atocha",   name:"Atocha",     icon:"🔴", full:"NH Atocha" },
-  { id:"eliptica", name:"P. Elíptica",icon:"🟢", full:"Plaza Elíptica" },
+  {id:"vallecas",name:"Vallecas",icon:"🟠",full:"Puente de Vallecas"},
+  {id:"atocha",name:"Atocha",icon:"🔴",full:"NH Atocha"},
+  {id:"eliptica",name:"P. Elíptica",icon:"🟢",full:"Plaza Elíptica"},
 ];
+const PAYMENTS = [{id:"Efectivo",icon:"💵"},{id:"Tarjeta",icon:"💳"},{id:"Bizum",icon:"📱"},{id:"Transf.",icon:"🏦"}];
 
-const PAYMENTS = [
-  {id:"Efectivo",icon:"💵"},{id:"Tarjeta",icon:"💳"},{id:"Bizum",icon:"📱"},{id:"Transferencia",icon:"🏦"}
-];
+// ── STATE ─────────────────────────────────────────────────
+var sales={}, currentView="dashboard", currentSeller="all";
+var selTrip=null,selBus=null,selSeats=[],selPayment="Bizum",selPriceType="adulto",selDeparture=null,sellerForm="jose";
+var filterTrip="all",filterStatus="all",filterSeller="all",detailKey=null,tripsOpen=false;
 
-// ─── STATE ────────────────────────────────────────────────
-var sales = {};
-var currentView = "dashboard";
-var currentSeller = "all"; // all | jose | cris
-var selTrip = null, selBus = null, selSeats = [];
-var selPayment = "Bizum", selPriceType = "adulto", selDeparture = null;
-var selObs = "";
-var filterTrip = "all", filterStatus = "all", filterSeller = "all";
-var detailKey = null, tripsOpen = false;
+// ── HELPERS ───────────────────────────────────────────────
+function getTrip(id){return TRIPS.find(function(t){return t.id===id;});}
+function getBus(id){return BUSES.find(function(b){return b.id===id;});}
+function salesArr(){return Object.keys(sales).map(function(k){var s=Object.assign({},sales[k]);s._key=k;return s;}).sort(function(a,b){return (b.ts||0)-(a.ts||0);});}
+function occupied(tripId,busId){return salesArr().filter(function(s){return s.tripId===tripId&&s.busId===busId&&s.status!=="Cancelado";}).reduce(function(a,s){var ss=Array.isArray(s.seats)?s.seats:[s.seat];return a.concat(ss);},[]);}
+function stBadge(s){if(s==="Pagado")return'<span class="badge badge-pagado">✓ Pagado</span>';if(s==="Pendiente")return'<span class="badge badge-pendiente">⏳ Pendiente</span>';return'<span class="badge badge-cancelado">✕ Cancelado</span>';}
+function selBadge(s){if(s==="jose")return'<span class="badge badge-jose">🔵 Jose</span>';if(s==="cris")return'<span class="badge badge-cris">🟣 Cris</span>';return"";}
+function fmtD(d){var p=d.split("-");return p[2]+"/"+p[1]+"/"+p[0];}
+function getD(k){return DEPARTURES.find(function(d){return d.id===k;})||{full:k,icon:"📍",name:k};}
+function syncUI(st,txt){var d=document.getElementById("syncDot"),t=document.getElementById("syncTxt");if(d)d.className="sync-dot "+st;if(t)t.textContent=txt||st;}
+function updateRevenue(){var arr=salesArr();if(currentSeller!=="all")arr=arr.filter(function(s){return s.seller===currentSeller;});var t=arr.filter(function(s){return s.status!=="Cancelado";}).reduce(function(a,s){return a+(s.senal||0);},0);var el=document.getElementById("totalRevenue");if(el)el.textContent="€"+t;}
+function toast(msg,type){var t=document.createElement("div");t.className="toast";t.style.background=type==="error"?"#EF4444":type==="warn"?"#F59E0B":"#10B981";t.innerHTML=msg;document.body.appendChild(t);setTimeout(function(){t.style.opacity="0";t.style.transition="opacity .4s";setTimeout(function(){t.remove();},400);},3000);}
+function getFormVals(){var o={};["fClient","fPhone","fEmail","fSenal","fObs"].forEach(function(id){var el=document.getElementById(id);if(el)o[id]=el.value;});return o;}
+function setFormVals(o){Object.keys(o).forEach(function(id){var el=document.getElementById(id);if(el)el.value=o[id];});}
 
-// ─── HELPERS ─────────────────────────────────────────────
-function getTrip(id){ return TRIPS.find(function(t){return t.id===id;}); }
-function getBus(id){ return BUSES.find(function(b){return b.id===id;}); }
-function salesArr(){
-  return Object.keys(sales).map(function(k){
-    var s=Object.assign({},sales[k]); s._key=k; return s;
-  }).sort(function(a,b){return (b.ts||0)-(a.ts||0);});
-}
-function occupied(tripId,busId){
-  return salesArr().filter(function(s){return s.tripId===tripId&&s.busId===busId&&s.status!=="Cancelado";})
-    .reduce(function(a,s){var seats=Array.isArray(s.seats)?s.seats:[s.seat];return a.concat(seats);},[]); 
-}
-function stColor(s){ return s==="Pagado"?"#22c55e":s==="Pendiente"?"#f59e0b":"#ef4444"; }
-function bdg(txt,col){ return '<span class="badge" style="background:'+col+'22;color:'+col+';border:1px solid '+col+'44">'+txt+'</span>'; }
-function fmtD(d){ var p=d.split("-"); return p[2]+"/"+p[1]+"/"+p[0]; }
-function setSyncDot(st){ var d=document.getElementById("syncDot"); if(d) d.className="sync-dot "+st; }
-function updateRevenue(){
-  var arr=salesArr();
-  if(currentSeller!=="all") arr=arr.filter(function(s){return s.seller===currentSeller;});
-  var t=arr.filter(function(s){return s.status!=="Cancelado";}).reduce(function(a,s){return a+(s.senal||0);},0);
-  var el=document.getElementById("totalRevenue"); if(el) el.textContent="€"+t;
-}
-function toast(msg,type){
-  var t=document.createElement("div"); t.className="toast";
-  t.style.background=type==="error"?"#ef4444":"#22c55e"; t.textContent=msg;
-  document.body.appendChild(t);
-  setTimeout(function(){t.style.opacity="0";setTimeout(function(){t.remove();},400);},3000);
-}
-function sellerTag(seller){
-  if(seller==="jose") return '<span class="seller-tag-jose">🔵 Jose Ariel</span>';
-  if(seller==="cris") return '<span class="seller-tag-cris">🟣 Cris</span>';
-  return "";
-}
-function getDepartureInfo(key){ return DEPARTURES.find(function(d){return d.id===key;})||{full:key,icon:"📍",name:key}; }
+// ── FIREBASE ─────────────────────────────────────────────
+salesRef.on("value",function(snap){sales=snap.val()||{};syncUI("online","En línea ✓");updateRevenue();render();},function(){syncUI("error","Sin conexión");render();});
 
-// ─── FIREBASE ────────────────────────────────────────────
-salesRef.on("value", function(snap){
-  sales=snap.val()||{};
-  setSyncDot("online");
-  updateRevenue();
-  render();
-}, function(){ setSyncDot("error"); render(); });
-
-// ─── SELLER SWITCH ────────────────────────────────────────
+// ── SELLER ────────────────────────────────────────────────
 function setSeller(s){
   currentSeller=s;
-  ["all","jose","cris"].forEach(function(id){
-    var btn=document.getElementById("sb"+id.charAt(0).toUpperCase()+id.slice(1));
-    if(btn) btn.classList.toggle("active", id===s);
-  });
-  updateRevenue(); render();
+  document.querySelectorAll(".seller-tab").forEach(function(b){b.classList.remove("active");});
+  var ids={all:"sbAll",jose:"sbJose",cris:"sbCris"};
+  var el=document.getElementById(ids[s]);if(el)el.classList.add("active");
+  updateRevenue();render();
 }
 
-// ─── TRIPS ACCORDION ─────────────────────────────────────
+// ── TRIPS ACCORDION ───────────────────────────────────────
 function buildTripsList(){
   var html="";
   TRIPS.forEach(function(t){
-    var cp=t.prices.nino?'<div class="trip-price-child">Niños €'+t.prices.nino+'</div>':"";
-    html+='<div class="trip-item" onclick="pickTrip('+t.id+')">'
-      +'<div class="trip-dot" style="background:'+t.color+'"></div>'
-      +'<div style="flex:1"><div class="trip-dest">'+t.dest+'</div><div class="trip-date">'+t.day+' '+fmtD(t.date)+'</div></div>'
-      +'<div style="text-align:right"><div class="trip-price-main">€'+t.prices.adulto+'</div>'+cp+'</div>'
+    var cp=t.prices.nino?' / <span style="color:#94A3B8">Niños €'+t.prices.nino+'</span>':"";
+    html+='<div class="trip-row" onclick="pickTrip('+t.id+')">'
+      +'<div class="trip-color-dot" style="background:'+t.color+'"></div>'
+      +'<div style="flex:1"><div class="trip-row-dest">'+t.emoji+' '+t.dest+'</div><div class="trip-row-date">'+t.day+' '+fmtD(t.date)+'</div></div>'
+      +'<div style="text-align:right"><div class="trip-row-price">€'+t.prices.adulto+'</div>'+cp+'</div>'
       +'</div>';
   });
-  document.getElementById("tripsList").innerHTML=html;
+  document.getElementById("tripsDropdown").innerHTML=html;
 }
-
 function toggleTrips(){
   tripsOpen=!tripsOpen;
-  document.getElementById("tripsList").classList.toggle("open",tripsOpen);
-  document.getElementById("tripsArrow").classList.toggle("open",tripsOpen);
+  document.getElementById("tripsDropdown").classList.toggle("open",tripsOpen);
+  var btn=document.getElementById("tripsToggleBtn");
+  if(btn){btn.innerHTML=tripsOpen?'<span>🗺️ Cerrar viajes</span><span>▲</span>':'<span>🗺️ Ver todos los viajes</span><span>▼</span>';}
 }
+function pickTrip(id){selTrip=getTrip(id);selBus=null;selSeats=[];selPriceType="adulto";selDeparture=null;if(tripsOpen)toggleTrips();showView("busSelect",true);}
 
-function pickTrip(id){
-  selTrip=getTrip(id); selBus=null; selSeats=[]; selPriceType="adulto"; selDeparture=null; selObs="";
-  if(tripsOpen) toggleTrips();
-  showView("busSelect",true);
-}
-
-// ─── NAVIGATION ──────────────────────────────────────────
+// ── NAVIGATION ────────────────────────────────────────────
 function showView(view,hideNav){
   currentView=view;
   var nav=document.getElementById("mainNav");
   if(nav){
     nav.style.display=hideNav?"none":"flex";
-    if(!hideNav){
-      var btns=nav.querySelectorAll(".nav-btn");
-      ["dashboard","newSale","sales","profile"].forEach(function(v,i){btns[i].classList.toggle("active",v===view);});
-    }
+    if(!hideNav){var btns=nav.querySelectorAll(".nav-item");["dashboard","newSale","sales","profile"].forEach(function(v,i){btns[i].classList.toggle("active",v===view);});}
   }
-  render(); updateRevenue();
+  render();updateRevenue();
 }
-
 function render(){
-  var c=document.getElementById("content"); if(!c) return;
-  var map={
-    dashboard:renderDashboard, newSale:renderNewSale, busSelect:renderBusSelect,
-    seatMap:renderSeatMap, clientForm:renderClientForm,
-    sales:renderSales, detail:renderDetail, profile:renderProfile
-  };
+  var c=document.getElementById("content");if(!c)return;
+  var map={dashboard:renderDashboard,newSale:renderNewSale,busSelect:renderBusSelect,seatMap:renderSeatMap,clientForm:renderClientForm,sales:renderSales,detail:renderDetail,profile:renderProfile};
   c.innerHTML=(map[currentView]||renderDashboard)();
 }
 
-// ─── DASHBOARD ────────────────────────────────────────────
+// ── DASHBOARD ────────────────────────────────────────────
 function renderDashboard(){
   var arr=salesArr();
-  if(currentSeller!=="all") arr=arr.filter(function(s){return s.seller===currentSeller;});
+  if(currentSeller!=="all")arr=arr.filter(function(s){return s.seller===currentSeller;});
   var totalSenal=arr.filter(function(s){return s.status!=="Cancelado";}).reduce(function(a,s){return a+(s.senal||0);},0);
   var totalMet=arr.filter(function(s){return s.status!=="Cancelado";}).reduce(function(a,s){return a+(s.metalico||0);},0);
   var pending=arr.filter(function(s){return s.status==="Pendiente";}).length;
   var total=arr.filter(function(s){return s.status!=="Cancelado";}).length;
-  var sellerTitle=currentSeller==="all"?"Panel General":currentSeller==="jose"?"Panel — Jose Ariel":"Panel — Cris";
-  var html='<div class="section-title">'+sellerTitle+'</div>'
-    +'<div class="stat-row">'
-    +'<div class="stat-card" style="background:linear-gradient(135deg,#E8A83818,#E8A83808);border:1px solid #E8A83830"><div class="stat-num" style="color:#E8A838">€'+totalSenal+'</div><div class="stat-label">Total señales</div></div>'
-    +'<div class="stat-card" style="background:linear-gradient(135deg,#22c55e18,#22c55e08);border:1px solid #22c55e30"><div class="stat-num" style="color:#22c55e">€'+totalMet+'</div><div class="stat-label">Pdte. metálico</div></div>'
-    +'<div class="stat-card" style="background:linear-gradient(135deg,#3A7BD518,#3A7BD508);border:1px solid #3A7BD530"><div class="stat-num" style="color:#3A7BD5">'+total+'</div><div class="stat-label">Reservas</div></div>'
-    +'<div class="stat-card" style="background:linear-gradient(135deg,#f59e0b18,#f59e0b08);border:1px solid #f59e0b30"><div class="stat-num" style="color:#f59e0b">'+pending+'</div><div class="stat-label">Pendientes</div></div>'
-    +'</div><div class="section-title">Próximos viajes</div>';
+  var who=currentSeller==="all"?"General":currentSeller==="jose"?"Jose Ariel":"Cris";
+  var html='<div class="sec-header"><span class="sec-icon">📊</span><span class="sec-title">Panel '+who+'</span></div>'
+    +'<div class="stats-grid">'
+    +'<div class="stat-card" data-emoji="💰" style="background:linear-gradient(135deg,#FF6B35,#FF8C42)"><div class="stat-card-num">€'+totalSenal+'</div><div class="stat-card-label">Total señales</div></div>'
+    +'<div class="stat-card" data-emoji="💵" style="background:linear-gradient(135deg,#06D6A0,#05B58A)"><div class="stat-card-num">€'+totalMet+'</div><div class="stat-card-label">Pdte. metálico</div></div>'
+    +'<div class="stat-card" data-emoji="🎫" style="background:linear-gradient(135deg,#00B4D8,#0077B6)"><div class="stat-card-num">'+total+'</div><div class="stat-card-label">Reservas</div></div>'
+    +'<div class="stat-card" data-emoji="⏳" style="background:linear-gradient(135deg,#FFD166,#FFBA08)"><div class="stat-card-num" style="color:var(--dark)">'+pending+'</div><div class="stat-card-label" style="color:rgba(30,41,59,.7)">Pendientes</div></div>'
+    +'</div>'
+    +'<div class="sec-header"><span class="sec-icon">✈️</span><span class="sec-title">Próximos viajes</span><span class="sec-badge">'+TRIPS.length+'</span></div>';
   TRIPS.forEach(function(t){
     var allArr=salesArr();
-    if(currentSeller!=="all") allArr=allArr.filter(function(s){return s.seller===currentSeller;});
     var occ=BUSES.reduce(function(a,b){return a+occupied(t.id,b.id).length;},0);
     var cap=BUSES.reduce(function(a,b){return a+b.seats;},0);
     var pct=Math.round((occ/cap)*100);
-    var myOcc=allArr.filter(function(s){return s.tripId===t.id&&s.status!=="Cancelado";}).reduce(function(a,s){var seats=Array.isArray(s.seats)?s.seats:[s.seat];return a+seats.length;},0);
+    var myOcc=0;
+    if(currentSeller!=="all"){myOcc=allArr.filter(function(s){return s.tripId===t.id&&s.status!=="Cancelado"&&s.seller===currentSeller;}).reduce(function(a,s){var ss=Array.isArray(s.seats)?s.seats:[s.seat];return a+ss.length;},0);}
     var cp=t.prices.nino?" · Niños €"+t.prices.nino:"";
-    html+='<div class="tour-card" style="background:linear-gradient(135deg,#1A1D2E,#161820);border-color:'+t.color+'30" onclick="pickTrip('+t.id+')">'
-      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">'
-      +'<div style="flex:1"><div class="tour-name">'+t.dest+'</div><div class="tour-meta">'+t.day+' '+fmtD(t.date)+'</div><div class="tour-meta" style="color:#E8A838">Adultos €'+t.prices.adulto+cp+'</div></div>'
-      +'<div style="text-align:right">'
-      +(currentSeller!=="all"?'<div style="font-size:10px;color:'+SELLERS[currentSeller].color+'">Mis: '+myOcc+'</div>':'')
-      +'<span class="badge" style="background:'+t.color+'22;color:'+t.color+';border:1px solid '+t.color+'44">'+occ+' total</span>'
-      +'</div></div>'
-      +'<div class="progress-bar"><div class="progress-fill" style="background:'+t.color+';width:'+pct+'%"></div></div>'
-      +'<div class="progress-label">'+occ+' de '+cap+' plazas reservadas</div>'
-      +'</div>';
-  });
-  return html;
-}
-
-// ─── NEW SALE ─────────────────────────────────────────────
-function renderNewSale(){
-  var html='<button class="back-btn" onclick="showView(\'dashboard\')">← Volver</button>'
-    +'<div class="section-title">Nueva Reserva</div>'
-    +'<div style="font-size:11px;color:#8B8680;margin-bottom:11px">Selecciona un viaje</div>';
-  TRIPS.forEach(function(t){
-    var sel=selTrip&&selTrip.id===t.id;
-    var cp=t.prices.nino?'<span style="font-size:10px;color:#8B8680"> / Niños €'+t.prices.nino+'</span>':"";
-    html+='<div class="tour-card" style="background:'+(sel?t.color+'20':'linear-gradient(135deg,#1A1D2E,#161820)')+';border-color:'+(sel?t.color:t.color+'30')+'" onclick="pickTrip('+t.id+')">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">'
-      +'<div style="flex:1"><div class="tour-name">'+t.dest+'</div><div class="tour-meta">'+t.day+' '+fmtD(t.date)+'</div><div style="font-size:9px;color:#6B6660;margin-top:2px">'+t.info+'</div></div>'
-      +'<div style="text-align:right;flex-shrink:0"><div style="font-size:15px;font-weight:bold;color:'+t.color+'">€'+t.prices.adulto+'</div>'+cp+'</div>'
+    html+='<div class="trip-card" onclick="pickTrip('+t.id+')">'
+      +'<div class="trip-card-accent" style="background:'+t.color+'"></div>'
+      +'<div class="trip-card-inner">'
+      +'<div class="trip-card-top">'
+      +'<div><div class="trip-card-dest">'+t.emoji+' '+t.dest+'</div><div class="trip-card-date">'+t.day+' '+fmtD(t.date)+'</div><div class="trip-card-info">'+t.info+'</div></div>'
+      +'<div class="trip-card-prices"><div class="trip-card-price" style="color:'+t.color+'">€'+t.prices.adulto+'</div><div class="trip-card-child">'+cp+'</div></div>'
+      +'</div>'
+      +'<div class="trip-card-bar"><div class="trip-card-fill" style="background:'+t.color+';width:'+pct+'%"></div></div>'
+      +'<div class="trip-card-stats">'
+      +'<span class="trip-card-stat-txt">'+occ+' de '+cap+' plazas'+(currentSeller!=="all"?' · Mis: '+myOcc:'')+'</span>'
+      +'<span class="trip-card-badge" style="background:'+t.color+'22;color:'+t.color+'">'+pct+'% ocupado</span>'
+      +'</div>'
       +'</div></div>';
   });
   return html;
 }
 
-// ─── BUS SELECT ───────────────────────────────────────────
+// ── NEW SALE ─────────────────────────────────────────────
+function renderNewSale(){
+  var html='<button class="back-btn" onclick="showView(\'dashboard\')">← Volver</button>'
+    +'<div class="sec-header"><span class="sec-icon">🎫</span><span class="sec-title">Nueva Reserva</span></div>';
+  TRIPS.forEach(function(t){
+    var cp=t.prices.nino?'<span style="font-size:11px;color:#64748B;font-weight:600"> · Niños €'+t.prices.nino+'</span>':"";
+    html+='<div class="trip-card" onclick="pickTrip('+t.id+')">'
+      +'<div class="trip-card-accent" style="background:'+t.color+'"></div>'
+      +'<div class="trip-card-inner">'
+      +'<div class="trip-card-top">'
+      +'<div><div class="trip-card-dest">'+t.emoji+' '+t.dest+'</div><div class="trip-card-date">'+t.day+' '+fmtD(t.date)+'</div><div class="trip-card-info">'+t.info+'</div></div>'
+      +'<div class="trip-card-prices"><div class="trip-card-price" style="color:'+t.color+'">€'+t.prices.adulto+'</div>'+cp+'</div>'
+      +'</div></div></div>';
+  });
+  return html;
+}
+
+// ── BUS SELECT ────────────────────────────────────────────
 function renderBusSelect(){
   var html='<button class="back-btn" onclick="showView(\'newSale\')">← Volver</button>'
-    +'<div class="section-title">Seleccionar Bus</div>'
-    +'<div style="font-size:11px;color:#8B8680;margin-bottom:12px">'+selTrip.dest+' — '+fmtD(selTrip.date)+'</div>'
-    +'<div class="bus-selector">';
+    +'<div class="sec-header"><span class="sec-icon">🚌</span><span class="sec-title">Elige el bus</span></div>'
+    +'<div style="background:linear-gradient(135deg,'+selTrip.color+'22,'+selTrip.color+'11);border:2px solid '+selTrip.color+'44;border-radius:14px;padding:12px 14px;margin-bottom:16px">'
+    +'<div style="font-size:18px;font-weight:900;color:var(--dark)">'+selTrip.emoji+' '+selTrip.dest+'</div>'
+    +'<div style="font-size:12px;color:var(--gray);font-weight:600;margin-top:2px">'+selTrip.day+' '+fmtD(selTrip.date)+' · '+selTrip.info+'</div>'
+    +'</div>'
+    +'<div class="bus-grid">';
   BUSES.forEach(function(b){
     var occ=occupied(selTrip.id,b.id).length;
     var avail=b.seats-occ;
     var sel=selBus&&selBus.id===b.id;
-    html+='<div class="bus-opt '+(sel?'selected':'')+'" onclick="doSelBus('+b.id+')">'
-      +'<div style="font-size:26px;margin-bottom:4px">🚌</div>'
-      +'<div class="bus-opt-name">'+b.name+'</div>'
-      +'<div class="bus-opt-seats">'+b.seats+' plazas</div>'
-      +'<div style="font-size:11px;color:#22c55e;margin-top:3px">'+avail+' libres</div>'
-      +'<div style="font-size:10px;color:#E8A838">'+occ+' reservadas</div>'
+    html+='<div class="bus-card '+(sel?'selected':'')+'" onclick="doSelBus('+b.id+')">'
+      +'<div class="bus-emoji">🚌</div>'
+      +'<div class="bus-name">'+b.name+'</div>'
+      +'<div class="bus-seats">'+b.seats+' plazas totales</div>'
+      +'<div class="bus-free">'+avail+' libres</div>'
+      +'<div class="bus-taken">'+occ+' reservadas</div>'
       +'</div>';
   });
   html+='</div>';
-  if(selBus) html+='<button class="btn btn-gold" onclick="showView(\'seatMap\',true)">Ver plazas de '+selBus.name+' →</button>';
+  if(selBus) html+='<button class="btn-primary" onclick="showView(\'seatMap\',true)">🪑 Ver plazas de '+selBus.name+'</button>';
   return html;
 }
-function doSelBus(id){ selBus=getBus(id); selSeats=[]; render(); }
+function doSelBus(id){selBus=getBus(id);selSeats=[];render();}
 
-// ─── SEAT MAP ─────────────────────────────────────────────
+// ── SEAT MAP ─────────────────────────────────────────────
 function renderSeatMap(){
   var occ=occupied(selTrip.id,selBus.id);
   var total=selBus.seats;
   var rows=Math.ceil(total/4);
   var html='<button class="back-btn" onclick="showView(\'busSelect\',true)">← Volver</button>'
-    +'<div style="text-align:center;margin-bottom:9px">'
-    +'<div style="font-size:9px;color:#E8A838;letter-spacing:3px;text-transform:uppercase">Seleccionar Plazas</div>'
-    +'<div style="font-size:13px;margin-top:2px">'+selTrip.dest+'</div>'
-    +'<div style="font-size:9px;color:#8B8680">'+selBus.name+' · '+total+' plazas · '+occ.length+' ocupadas</div>'
-    +'<div style="font-size:9px;color:#E8A838;margin-top:2px">Puedes seleccionar varias plazas</div>'
+    +'<div class="seat-map-header">'
+    +'<div class="seat-map-title">'+selTrip.emoji+' '+selTrip.dest+' · '+selBus.name+'</div>'
+    +'<div class="seat-map-sub">'+total+' plazas · '+occ.length+' ocupadas · '+(total-occ.length)+' libres</div>'
+    +'<div class="seat-map-hint">Toca las plazas que quieras reservar 👇</div>'
     +'</div>'
-    +'<div class="bus-front">🚌 CONDUCTOR</div>'
-    +'<div class="bus-body">';
+    +'<div class="bus-visual-front">🚌 &nbsp; C O N D U C T O R</div>'
+    +'<div class="bus-visual-body">';
   for(var r=0;r<rows;r++){
     html+='<div class="seat-row">';
     for(var c=0;c<2;c++){var sn=r*4+c+1;if(sn>total){html+='<div></div>';continue;}var isO=occ.indexOf(sn)>=0,isS=selSeats.indexOf(sn)>=0;html+='<div class="seat '+(isO?'occupied':isS?'selected':'free')+'" onclick="doSelSeat('+sn+','+isO+')">'+sn+'</div>';}
@@ -480,305 +732,234 @@ function renderSeatMap(){
     for(var c2=2;c2<4;c2++){var sn2=r*4+c2+1;if(sn2>total){html+='<div></div>';continue;}var isO2=occ.indexOf(sn2)>=0,isS2=selSeats.indexOf(sn2)>=0;html+='<div class="seat '+(isO2?'occupied':isS2?'selected':'free')+'" onclick="doSelSeat('+sn2+','+isO2+')">'+sn2+'</div>';}
     html+='</div>';
   }
-  html+='</div><div class="seat-legend"><span>🟡 Selec.</span><span>⬛ Libre</span><span>🔴 Ocupado</span></div>';
+  html+='</div>'
+    +'<div class="seat-legend">'
+    +'<span><div style="width:14px;height:14px;background:#F8FAFF;border:2px solid #CBD5E1;border-radius:4px"></div> Libre</span>'
+    +'<span><div style="width:14px;height:14px;background:linear-gradient(135deg,#FF6B35,#FF8C42);border-radius:4px"></div> Seleccionado</span>'
+    +'<span><div style="width:14px;height:14px;background:#FEE2E2;border:2px solid #FECACA;border-radius:4px"></div> Ocupado</span>'
+    +'</div>';
   if(selSeats.length>0){
-    html+='<div class="seats-summary"><div class="seats-summary-title">✅ Plazas seleccionadas ('+selSeats.length+')</div><div class="seats-chips">';
+    html+='<div class="selected-seats-box">'
+      +'<div class="selected-seats-title">✅ '+selSeats.length+' plaza'+(selSeats.length>1?"s")+" seleccionada"+(selSeats.length>1?"s")+'</div>'
+      +'<div class="seats-chips">';
     selSeats.slice().sort(function(a,b){return a-b;}).forEach(function(s){html+='<div class="seat-chip">'+s+'</div>';});
-    html+='</div></div><button class="btn btn-gold" onclick="showView(\'clientForm\',true)">Continuar con '+selSeats.length+' plaza'+(selSeats.length>1?'s':'')+' →</button>';
+    html+='</div></div>'
+      +'<button class="btn-primary" onclick="showView(\'clientForm\',true)">📝 Datos del cliente →</button>';
   }
   return html;
 }
-function doSelSeat(n,isO){ if(isO)return; var idx=selSeats.indexOf(n); if(idx>=0)selSeats.splice(idx,1); else selSeats.push(n); render(); }
+function doSelSeat(n,isO){if(isO)return;var idx=selSeats.indexOf(n);if(idx>=0)selSeats.splice(idx,1);else selSeats.push(n);render();}
 
-// ─── CLIENT FORM ──────────────────────────────────────────
+// ── CLIENT FORM ───────────────────────────────────────────
 function renderClientForm(){
   var t=selTrip;
   var hasChild=t.prices.nino!==null;
   var precio=selPriceType==="nino"&&t.prices.nino?t.prices.nino:t.prices.adulto;
   var totalPrecio=precio*selSeats.length;
-
   var html='<button class="back-btn" onclick="showView(\'seatMap\',true)">← Volver</button>'
-    +'<div class="section-title">Datos de la Reserva</div>'
+    +'<div class="sec-header"><span class="sec-icon">📝</span><span class="sec-title">Datos del cliente</span></div>'
 
-    // Resumen
-    +'<div class="card" style="border-color:'+t.color+'44;margin-bottom:11px">'
-    +'<div style="font-size:9px;color:#E8A838;letter-spacing:2px">RESUMEN</div>'
-    +'<div style="font-size:13px;margin-top:2px">'+t.dest+'</div>'
-    +'<div style="font-size:10px;color:#8B8680">'+t.day+' '+fmtD(t.date)+' · '+selBus.name+'</div>'
-    +'<div style="margin-top:7px;display:flex;flex-wrap:wrap;gap:4px">';
-  selSeats.slice().sort(function(a,b){return a-b;}).forEach(function(s){html+='<span class="seat-chip">Plaza '+s+'</span>';});
-  html+='</div>'
-    +'<div style="font-size:11px;color:#E8A838;margin-top:7px;font-weight:bold">'+selSeats.length+' plaza'+(selSeats.length>1?'s':'')+' · €'+precio+' c/u · Total: €'+totalPrecio+'</div>'
-    +'</div>'
+    // Resumen viaje
+    +'<div style="background:linear-gradient(135deg,'+t.color+'22,'+t.color+'11);border:2px solid '+t.color+'44;border-radius:16px;padding:13px 14px;margin-bottom:14px">'
+    +'<div style="font-size:16px;font-weight:900;color:var(--dark)">'+t.emoji+' '+t.dest+'</div>'
+    +'<div style="font-size:11px;font-weight:600;color:var(--gray);margin-top:2px">'+t.day+' '+fmtD(t.date)+' · '+selBus.name+'</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">';
+  selSeats.slice().sort(function(a,b){return a-b;}).forEach(function(s){html+='<span class="seat-chip">Nº '+s+'</span>';});
+  html+='</div><div style="font-size:13px;font-weight:900;color:'+t.color+';margin-top:8px">'+selSeats.length+' plaza'+(selSeats.length>1?'s':'')+' · €'+precio+' c/u = <span style="font-size:16px">€'+totalPrecio+'</span></div></div>'
 
     // VENDEDOR
-    +'<div class="form-group"><label class="label">Vendedor *</label>'
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
-    +'<div style="border-radius:9px;padding:11px;text-align:center;cursor:pointer;border:1.5px solid '+(currentSeller==="jose"||(!currentSeller||currentSeller==="all"&&sellerForm==="jose")?"#3A7BD5":"rgba(58,123,213,0.3)")+';background:'+(sellerForm==="jose"?"rgba(58,123,213,0.15)":"#161820")+'" onclick="doSelSeller(\'jose\')">'
-    +'<div style="font-size:20px">🔵</div><div style="font-size:12px;color:#F0EDE6;margin-top:3px">Jose Ariel</div></div>'
-    +'<div style="border-radius:9px;padding:11px;text-align:center;cursor:pointer;border:1.5px solid '+(sellerForm==="cris"?"#C084FC":"rgba(192,132,252,0.3)")+';background:'+(sellerForm==="cris"?"rgba(192,132,252,0.15)":"#161820")+'" onclick="doSelSeller(\'cris\')">'
-    +'<div style="font-size:20px">🟣</div><div style="font-size:12px;color:#F0EDE6;margin-top:3px">Cris</div></div>'
+    +'<div class="form-group"><label class="form-label">👤 Vendedor *</label>'
+    +'<div class="options-grid-2">'
+    +'<div class="option-card '+(sellerForm==="jose"?"selected":"")+'" onclick="doSelSeller(\'jose\')">'
+    +'<div class="option-icon">🔵</div><div class="option-name">Jose Ariel</div></div>'
+    +'<div class="option-card '+(sellerForm==="cris"?"selected":"")+'" onclick="doSelSeller(\'cris\')">'
+    +'<div class="option-icon">🟣</div><div class="option-name">Cris</div></div>'
     +'</div></div>'
 
-    // PUNTO DE SALIDA
-    +'<div class="form-group"><label class="label">Punto de salida *</label>'
-    +'<div class="departure-grid">';
+    // PUNTO SALIDA
+    +'<div class="form-group"><label class="form-label">📍 Punto de salida *</label>'
+    +'<div class="options-grid-3">';
   DEPARTURES.forEach(function(d){
-    var time=t.salidas[d.id]||"--:--";
-    var sel=selDeparture===d.id;
-    html+='<div class="dep-opt '+(sel?'selected':'')+'" onclick="doSelDep(\''+d.id+'\')">'
-      +'<div class="dep-opt-icon">'+d.icon+'</div>'
-      +'<div class="dep-opt-name">'+d.name+'</div>'
-      +'<div class="dep-opt-time">'+time+'</div>'
+    var hora=t.salidas[d.id]||"--:--";
+    html+='<div class="option-card '+(selDeparture===d.id?"selected":"")+'" onclick="doSelDep(\''+d.id+'\')">'
+      +'<div class="option-icon">'+d.icon+'</div>'
+      +'<div class="option-name">'+d.name+'</div>'
+      +'<div class="option-sub">'+hora+'h</div>'
       +'</div>';
   });
   html+='</div></div>';
 
-  // Tipo pasajero
+  // TIPO
   if(hasChild){
-    html+='<div class="form-group"><label class="label">Tipo de pasajero</label><div class="price-types">'
-      +'<div class="price-type-opt '+(selPriceType==="adulto"?"selected":"")+'" onclick="doSelPT(\'adulto\')">'
-      +'<div class="price-type-name">Adulto</div><div class="price-type-price">€'+t.prices.adulto+'</div></div>'
-      +'<div class="price-type-opt '+(selPriceType==="nino"?"selected":"")+'" onclick="doSelPT(\'nino\')">'
-      +'<div class="price-type-name">Niño</div><div class="price-type-price">€'+t.prices.nino+'</div><div class="price-type-desc">3-10 años</div></div>'
+    html+='<div class="form-group"><label class="form-label">🎟️ Tipo de pasajero</label>'
+      +'<div class="options-grid-2">'
+      +'<div class="option-card '+(selPriceType==="adulto"?"selected":"")+'" onclick="doSelPT(\'adulto\')">'
+      +'<div class="option-icon">🧑</div><div class="option-name">Adulto</div><div class="option-sub" style="font-size:13px;font-weight:900;color:#FF6B35">€'+t.prices.adulto+'</div></div>'
+      +'<div class="option-card '+(selPriceType==="nino"?"selected":"")+'" onclick="doSelPT(\'nino\')">'
+      +'<div class="option-icon">👶</div><div class="option-name">Niño</div><div class="option-sub" style="font-size:13px;font-weight:900;color:#FF6B35">€'+t.prices.nino+'</div><div class="option-sub">3-10 años</div></div>'
       +'</div></div>';
   }
 
-  html+='<div class="form-group"><label class="label">Nombre completo *</label><input class="input" id="fClient" placeholder="Ej: María García"></div>'
-    +'<div class="form-group"><label class="label">Teléfono *</label><input class="input" id="fPhone" placeholder="612 345 678" type="tel"></div>'
-    +'<div class="form-group"><label class="label">Email</label><input class="input" id="fEmail" placeholder="cliente@email.com" type="email"></div>'
+  html+='<div class="form-group"><label class="form-label">👤 Nombre completo *</label><input class="form-input" id="fClient" placeholder="Ej: María García Pérez"></div>'
+    +'<div class="form-group"><label class="form-label">📞 Teléfono *</label><input class="form-input" id="fPhone" placeholder="612 345 678" type="tel"></div>'
+    +'<div class="form-group"><label class="form-label">✉️ Email</label><input class="form-input" id="fEmail" placeholder="cliente@email.com" type="email"></div>'
 
     // SEÑAL
-    +'<div class="senal-box">'
-    +'<div class="senal-title">💰 Mi señal</div>'
-    +'<div class="senal-row">'
-    +'<div><label class="label" style="color:#E8A838">Señal pagada (€)</label>'
-    +'<input class="input" id="fSenal" placeholder="'+t.senalMin*selSeats.length+'" type="number" min="0" max="'+totalPrecio+'" oninput="calcMet('+totalPrecio+')" style="border-color:rgba(232,168,56,0.4)"></div>'
-    +'<div><label class="label" style="color:#22c55e">Resto metálico</label>'
-    +'<div class="input" id="fMetalico" style="color:#22c55e;font-weight:bold;font-size:14px;border-color:rgba(34,197,94,0.3);background:#0a1a0f">€'+totalPrecio+'</div></div>'
+    +'<div class="senal-card">'
+    +'<div class="senal-card-title">💰 Mi señal — pago para reservar</div>'
+    +'<div class="senal-grid">'
+    +'<div><label class="form-label" style="color:#B45309">Señal pagada (€)</label>'
+    +'<input class="form-input" id="fSenal" placeholder="'+t.senalMin*selSeats.length+'" type="number" min="0" max="'+totalPrecio+'" oninput="calcMet('+totalPrecio+')" style="border-color:#FCD34D;background:#FFFBEB"></div>'
+    +'<div><label class="form-label" style="color:#059669">Resto en metálico</label>'
+    +'<div class="form-input" id="fMetalico" style="color:#059669;font-weight:900;font-size:18px;background:#ECFDF5;border-color:#6EE7B7">€'+totalPrecio+'</div></div>'
     +'</div>'
-    +'<div style="font-size:9px;color:#8B8680;margin-top:6px">Total: <strong style="color:#E8A838">€'+totalPrecio+'</strong> ('+selSeats.length+' × €'+precio+')</div>'
+    +'<div style="font-size:11px;font-weight:700;color:#92400E;margin-top:8px">💵 El resto se paga en metálico al subir al bus el día del viaje</div>'
     +'</div>'
 
     // MÉTODO PAGO
-    +'<div class="form-group"><label class="label">Método de pago señal</label><div class="payment-grid">';
-  PAYMENTS.forEach(function(m){html+='<div class="payment-opt '+(selPayment===m.id?"selected":"")+'" onclick="doSelPay(\''+m.id+'\')">'+m.icon+' '+m.id+'</div>';});
+    +'<div class="form-group"><label class="form-label">💳 Método de pago señal</label>'
+    +'<div class="options-grid-4">';
+  PAYMENTS.forEach(function(m){html+='<div class="option-card '+(selPayment===m.id?"selected":"")+'" onclick="doSelPay(\''+m.id+'\')" style="padding:9px 4px"><div class="option-icon">'+m.icon+'</div><div class="option-name" style="font-size:10px">'+m.id+'</div></div>';});
   html+='</div></div>'
-
-    // OBSERVACIONES
-    +'<div class="form-group"><label class="label">Observaciones</label>'
-    +'<textarea class="textarea" id="fObs" placeholder="Alergias, necesidades especiales, notas...">'+selObs+'</textarea></div>'
-
-    +'<button class="btn btn-gold" onclick="confirmSale('+totalPrecio+')">✓ Confirmar y generar ticket PDF</button>';
+    +'<div class="form-group"><label class="form-label">📌 Observaciones</label>'
+    +'<textarea class="form-textarea" id="fObs" placeholder="Alergias, necesidades especiales, notas..."></textarea></div>'
+    +'<button class="btn-primary" onclick="confirmSale('+totalPrecio+')">✅ Confirmar y generar PDF</button>';
   return html;
 }
 
-var sellerForm = currentSeller!=="all"?currentSeller:"jose";
-function doSelSeller(s){ sellerForm=s; var vals=getFormVals(); render(); setFormVals(vals); }
-function doSelDep(d){ selDeparture=d; var vals=getFormVals(); render(); setFormVals(vals); }
-function doSelPT(type){ var vals=getFormVals(); selPriceType=type; render(); setFormVals(vals); recalcMet(); }
-function doSelPay(p){ var vals=getFormVals(); selPayment=p; render(); setFormVals(vals); recalcMet(); }
-function getFormVals(){ var o={}; ["fClient","fPhone","fEmail","fSenal","fObs"].forEach(function(id){var el=document.getElementById(id);if(el)o[id]=el.value;}); return o; }
-function setFormVals(o){ Object.keys(o).forEach(function(id){var el=document.getElementById(id);if(el)el.value=o[id];}); }
-function calcMet(total){ var s=parseFloat(document.getElementById("fSenal").value)||0; var el=document.getElementById("fMetalico"); if(el) el.textContent="€"+Math.max(0,total-s); }
-function recalcMet(){ var p=selPriceType==="nino"&&selTrip&&selTrip.prices.nino?selTrip.prices.nino:selTrip?selTrip.prices.adulto:0; calcMet(p*selSeats.length); }
+function calcMet(total){var s=parseFloat(document.getElementById("fSenal").value)||0;var el=document.getElementById("fMetalico");if(el)el.textContent="€"+Math.max(0,total-s);}
+function doSelSeller(s){var v=getFormVals();sellerForm=s;render();setFormVals(v);}
+function doSelDep(d){var v=getFormVals();selDeparture=d;render();setFormVals(v);}
+function doSelPT(tp){var v=getFormVals();selPriceType=tp;render();setFormVals(v);recalcMet();}
+function doSelPay(p){var v=getFormVals();selPayment=p;render();setFormVals(v);}
+function recalcMet(){var p=selPriceType==="nino"&&selTrip&&selTrip.prices.nino?selTrip.prices.nino:selTrip?selTrip.prices.adulto:0;calcMet(p*selSeats.length);}
 
-// ─── PDF GENERATOR ────────────────────────────────────────
-function generatePDF(saleData){
-  try {
-    var doc = new window.jspdf.jsPDF();
-    var t = getTrip(saleData.tripId);
-    var b = getBus(saleData.busId);
-    var dep = getDepartureInfo(saleData.departure);
-    var seats = Array.isArray(saleData.seats)?saleData.seats:[saleData.seat];
-    var seller = SELLERS[saleData.seller]||{name:"—"};
+// ── PDF ───────────────────────────────────────────────────
+function generatePDF(sd){
+  try{
+    var doc=new window.jspdf.jsPDF();
+    var t=getTrip(sd.tripId),b=getBus(sd.busId);
+    var dep=getD(sd.departure);
+    var seats=Array.isArray(sd.seats)?sd.seats:[sd.seat];
+    var seller=SELLERS[sd.seller]||{name:"—"};
+    var hora=t?t.salidas[sd.departure]||"--:--":"--:--";
 
-    // Header background
-    doc.setFillColor(15,17,23);
-    doc.rect(0,0,210,297,'F');
+    // BG
+    doc.setFillColor(248,250,255); doc.rect(0,0,210,297,'F');
+    // Header
+    doc.setFillColor(255,107,53); doc.rect(0,0,210,32,'F');
+    doc.setFillColor(255,140,66); doc.rect(0,26,210,6,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(20); doc.setFont("helvetica","bold");
+    doc.text("YO ME VOY EXCURSIONES",105,13,{align:"center"});
+    doc.setFontSize(10); doc.setFont("helvetica","normal");
+    doc.text("🚌  BILLETE OFICIAL DE RESERVA",105,23,{align:"center"});
 
-    // Gold header bar
-    doc.setFillColor(232,168,56);
-    doc.rect(0,0,210,28,'F');
+    // Localizador
+    doc.setFillColor(255,255,255); doc.roundedRect(10,37,190,20,4,4,'F');
+    doc.setDrawColor(255,107,53); doc.roundedRect(10,37,190,20,4,4,'S');
+    doc.setTextColor(255,107,53); doc.setFontSize(9); doc.setFont("helvetica","bold");
+    doc.text("LOCALIZADOR",14,45);
+    doc.setFontSize(15); doc.text("#"+sd._key.substr(-8).toUpperCase(),14,54);
+    doc.setTextColor(100,116,139); doc.setFontSize(9); doc.setFont("helvetica","normal");
+    doc.text("Fecha: "+sd.date,120,45);
+    doc.text("Vendedor: "+seller.name,120,54);
 
-    // Title
-    doc.setTextColor(15,17,23);
-    doc.setFontSize(18);
-    doc.setFont("helvetica","bold");
-    doc.text("YO ME VOY EXCURSIONES",105,11,{align:"center"});
-    doc.setFontSize(11);
-    doc.text("BILLETE DE RESERVA",105,20,{align:"center"});
+    // Destino
+    doc.setFillColor(255,255,255); doc.roundedRect(10,62,190,38,4,4,'F');
+    doc.setTextColor(30,41,59); doc.setFontSize(9); doc.setFont("helvetica","bold");
+    doc.text("VIAJE",14,70);
+    doc.setFontSize(16); doc.text(t.dest+" — "+t.sub,14,80);
+    doc.setFont("helvetica","normal"); doc.setFontSize(10); doc.setTextColor(100,116,139);
+    doc.text(t.day+" "+fmtD(t.date)+"  ·  "+t.info,14,89);
+    doc.setTextColor(255,107,53); doc.setFont("helvetica","bold"); doc.setFontSize(10);
+    doc.text(b.name+"  ·  Plaza"+(seats.length>1?"s":"")+": "+seats.sort(function(a,b){return a-b;}).join(", ")+"  ·  "+(sd.priceType==="nino"?"Niño":"Adulto"),14,97);
 
-    // Ticket ID
-    doc.setFillColor(26,29,46);
-    doc.roundedRect(10,33,190,18,3,3,'F');
-    doc.setTextColor(232,168,56);
-    doc.setFontSize(9);
-    doc.setFont("helvetica","normal");
-    doc.text("LOCALIZADOR",14,41);
-    doc.setFontSize(14);
-    doc.setFont("helvetica","bold");
-    doc.text("#"+saleData._key.substr(-8).toUpperCase(),14,50);
-    doc.setFontSize(9);
-    doc.setFont("helvetica","normal");
-    doc.setTextColor(150,150,150);
-    doc.text("Fecha reserva: "+saleData.date,130,41);
-    doc.setTextColor(232,168,56);
-    doc.text("Vendedor: "+seller.name,130,50);
+    // Cliente
+    doc.setFillColor(255,255,255); doc.roundedRect(10,105,190,32,4,4,'F');
+    doc.setTextColor(30,41,59); doc.setFontSize(9); doc.setFont("helvetica","bold");
+    doc.text("PASAJERO",14,113);
+    doc.setFontSize(14); doc.text(sd.client,14,122);
+    doc.setFont("helvetica","normal"); doc.setFontSize(10); doc.setTextColor(100,116,139);
+    doc.text("Tel: "+sd.phone+(sd.email?"   Email: "+sd.email:""),14,130);
 
-    // VIAJE
-    doc.setFillColor(26,29,46);
-    doc.roundedRect(10,56,190,42,3,3,'F');
-    doc.setTextColor(232,168,56);
-    doc.setFontSize(8);
-    doc.text("INFORMACIÓN DEL VIAJE",14,64);
-    doc.setTextColor(240,237,230);
-    doc.setFontSize(13);
-    doc.setFont("helvetica","bold");
-    doc.text(t.dest,14,73);
-    doc.setFontSize(10);
-    doc.setFont("helvetica","normal");
-    doc.setTextColor(180,180,180);
-    doc.text(t.day+" "+fmtD(t.date),14,81);
-    doc.text(t.info,14,88);
-    // Seats
-    doc.setTextColor(232,168,56);
-    doc.setFontSize(9);
-    doc.text(b.name+" · "+seats.length+" plaza"+(seats.length>1?"s":"")+" · Nº: "+seats.sort(function(a,b){return a-b;}).join(", "),14,95);
+    // Salida — colored box
+    doc.setFillColor(6,214,160); doc.roundedRect(10,142,190,28,4,4,'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont("helvetica","bold");
+    doc.text("PUNTO DE SALIDA",14,151);
+    doc.setFontSize(14); doc.text(dep.full,14,162);
+    doc.setFontSize(11); doc.setFont("helvetica","normal");
+    doc.text("Hora de salida: "+hora+"h  ·  Regreso: "+t.regreso,110,162);
 
-    // CLIENTE
-    doc.setFillColor(26,29,46);
-    doc.roundedRect(10,103,190,38,3,3,'F');
-    doc.setTextColor(232,168,56);
-    doc.setFontSize(8);
-    doc.text("DATOS DEL PASAJERO",14,111);
-    doc.setTextColor(240,237,230);
-    doc.setFontSize(12);
-    doc.setFont("helvetica","bold");
-    doc.text(saleData.client,14,120);
-    doc.setFont("helvetica","normal");
-    doc.setFontSize(10);
-    doc.setTextColor(180,180,180);
-    doc.text("📞 "+saleData.phone+(saleData.email?"   ✉ "+saleData.email:""),14,129);
-    doc.setTextColor(232,168,56);
-    doc.text("Tipo: "+(saleData.priceType==="nino"?"Niño (3-10 años)":"Adulto"),14,137);
+    // Pago — two cols
+    doc.setFillColor(255,249,230); doc.roundedRect(10,175,92,52,4,4,'F');
+    doc.setDrawColor(252,211,77); doc.roundedRect(10,175,92,52,4,4,'S');
+    doc.setTextColor(180,83,9); doc.setFontSize(9); doc.setFont("helvetica","bold");
+    doc.text("SEÑAL PAGADA",14,184);
+    doc.setFontSize(24); doc.text("€"+sd.senal,14,198);
+    doc.setFontSize(9); doc.setFont("helvetica","normal"); doc.setTextColor(120,60,10);
+    doc.text("Método: "+sd.payment,14,207);
+    doc.text("Estado: "+sd.status,14,215);
+    doc.text("Total billete: €"+sd.total,14,223);
 
-    // SALIDA
-    doc.setFillColor(20,40,20);
-    doc.roundedRect(10,146,190,28,3,3,'F');
-    doc.setFillColor(34,197,94);
-    doc.roundedRect(10,146,4,28,2,2,'F');
-    doc.setTextColor(34,197,94);
-    doc.setFontSize(8);
-    doc.text("PUNTO DE SALIDA",18,154);
-    doc.setTextColor(240,237,230);
-    doc.setFontSize(12);
-    doc.setFont("helvetica","bold");
-    doc.text(dep.icon+" "+dep.full,18,163);
-    doc.setFont("helvetica","normal");
-    doc.setFontSize(10);
-    doc.setTextColor(34,197,94);
-    var hora=t.salidas[saleData.departure]||"--:--";
-    doc.text("Hora de salida: "+hora+"h",18,171);
+    doc.setFillColor(236,253,245); doc.roundedRect(108,175,92,52,4,4,'F');
+    doc.setDrawColor(110,231,183); doc.roundedRect(108,175,92,52,4,4,'S');
+    doc.setTextColor(5,150,105); doc.setFontSize(9); doc.setFont("helvetica","bold");
+    doc.text("PAGAR AL SUBIR AL BUS",112,184);
+    doc.setFontSize(24); doc.text("€"+sd.metalico,112,198);
+    doc.setFontSize(9); doc.setFont("helvetica","normal"); doc.setTextColor(6,78,59);
+    doc.text("En METÁLICO el día del viaje",112,207);
+    doc.text(b.name+" · "+dep.name,112,215);
+    doc.text(t.day+" "+fmtD(t.date),112,223);
 
-    // PAGO
-    doc.setFillColor(26,29,46);
-    doc.roundedRect(10,179,90,52,3,3,'F');
-    doc.roundedRect(110,179,90,52,3,3,'F');
-    // Señal
-    doc.setTextColor(232,168,56);
-    doc.setFontSize(8);
-    doc.text("SEÑAL PAGADA",14,188);
-    doc.setFontSize(20);
-    doc.setFont("helvetica","bold");
-    doc.text("€"+saleData.senal,14,202);
-    doc.setFontSize(9);
-    doc.setFont("helvetica","normal");
-    doc.setTextColor(180,180,180);
-    doc.text("Método: "+saleData.payment,14,211);
-    doc.text("Estado: "+saleData.status,14,219);
-    doc.text("Precio total: €"+saleData.total,14,227);
-    // Metálico
-    doc.setTextColor(34,197,94);
-    doc.setFontSize(8);
-    doc.text("RESTO A PAGAR EN BUS",114,188);
-    doc.setFontSize(20);
-    doc.setFont("helvetica","bold");
-    doc.text("€"+saleData.metalico,114,202);
-    doc.setFontSize(9);
-    doc.setFont("helvetica","normal");
-    doc.setTextColor(180,180,180);
-    doc.text("Pagar en metálico",114,211);
-    doc.text("al subir al "+b.name,114,219);
-    doc.text("el día del viaje",114,227);
-
-    // OBSERVACIONES
-    if(saleData.obs&&saleData.obs.trim()){
-      doc.setFillColor(26,29,46);
-      doc.roundedRect(10,236,190,22,3,3,'F');
-      doc.setTextColor(232,168,56);
-      doc.setFontSize(8);
-      doc.text("OBSERVACIONES",14,244);
-      doc.setTextColor(180,180,180);
-      doc.setFontSize(9);
-      doc.text(saleData.obs.substring(0,100),14,252);
+    // Obs
+    if(sd.obs&&sd.obs.trim()){
+      doc.setFillColor(255,255,255); doc.roundedRect(10,232,190,22,4,4,'F');
+      doc.setTextColor(100,116,139); doc.setFontSize(8); doc.setFont("helvetica","bold");
+      doc.text("OBSERVACIONES",14,240);
+      doc.setFont("helvetica","italic"); doc.setFontSize(9);
+      doc.text(sd.obs.substring(0,110),14,248);
     }
 
     // Footer
-    doc.setFillColor(232,168,56);
-    doc.rect(0,270,210,27,'F');
-    doc.setTextColor(15,17,23);
-    doc.setFontSize(9);
-    doc.setFont("helvetica","bold");
-    doc.text("Yo Me Voy Excursiones · WhatsApp: 663 413 151",105,279,{align:"center"});
-    doc.setFont("helvetica","normal");
+    doc.setFillColor(255,107,53); doc.rect(0,262,210,35,'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(11); doc.setFont("helvetica","bold");
+    doc.text("Yo Me Voy Excursiones · WhatsApp: 663 413 151",105,273,{align:"center"});
+    doc.setFontSize(9); doc.setFont("helvetica","normal");
+    doc.text("Presenta este billete en tu punto de salida el día del viaje",105,281,{align:"center"});
     doc.setFontSize(8);
-    doc.text("Conserva este billete. Preséntalo el día del viaje en tu punto de salida.",105,287,{align:"center"});
-    doc.text("www.instagram.com/excursionesyomevoy",105,293,{align:"center"});
+    doc.text("@excursionesyomevoy  ·  ¡Gracias por reservar con nosotros! 🙏",105,289,{align:"center"});
 
-    doc.save("Billete_"+saleData.client.replace(/ /g,"_")+"_"+t.dest.split("—")[0].trim().replace(/ /g,"_")+".pdf");
-    toast("📄 PDF generado correctamente");
-  } catch(e) {
-    toast("Error generando PDF","error");
-    console.error(e);
-  }
+    doc.save("Billete_"+sd.client.replace(/ /g,"_")+".pdf");
+    toast("📄 PDF generado ✅");
+  }catch(e){toast("Error al generar PDF","error");console.error(e);}
 }
 
-// ─── CONFIRM SALE ─────────────────────────────────────────
+// ── CONFIRM SALE ─────────────────────────────────────────
 function confirmSale(totalPrecio){
-  var client=document.getElementById("fClient").value.trim();
-  var phone=document.getElementById("fPhone").value.trim();
-  var email=document.getElementById("fEmail").value.trim();
-  var senal=parseFloat(document.getElementById("fSenal").value)||0;
-  var obs=document.getElementById("fObs")?document.getElementById("fObs").value.trim():"";
-  if(!client||!phone){ toast("Completa nombre y teléfono","error"); return; }
-  if(!selDeparture){ toast("Selecciona el punto de salida","error"); return; }
-  if(!sellerForm){ toast("Selecciona el vendedor","error"); return; }
-  if(selSeats.length===0){ toast("Selecciona al menos una plaza","error"); return; }
+  var client=(document.getElementById("fClient")||{}).value||"";
+  var phone=(document.getElementById("fPhone")||{}).value||"";
+  var email=(document.getElementById("fEmail")||{}).value||"";
+  var senal=parseFloat((document.getElementById("fSenal")||{}).value)||0;
+  var obs=(document.getElementById("fObs")||{}).value||"";
+  client=client.trim();phone=phone.trim();obs=obs.trim();
+  if(!client||!phone){toast("⚠️ Completa nombre y teléfono","warn");return;}
+  if(!selDeparture){toast("⚠️ Selecciona el punto de salida","warn");return;}
+  if(selSeats.length===0){toast("⚠️ Selecciona al menos una plaza","warn");return;}
   var metalico=Math.max(0,totalPrecio-senal);
-  setSyncDot("syncing");
-  var newSale={
-    tripId:selTrip.id, busId:selBus.id,
-    seats:selSeats.slice(), seat:selSeats[0], numSeats:selSeats.length,
-    client:client, phone:phone, email:email,
-    payment:selPayment, senal:senal, metalico:metalico, total:totalPrecio,
-    priceType:selPriceType, departure:selDeparture,
-    seller:sellerForm, obs:obs,
-    status:senal>=totalPrecio?"Pagado":"Pendiente",
-    date:new Date().toISOString().split("T")[0],
-    ts:Date.now()
-  };
-  salesRef.push(newSale).then(function(ref){
-    setSyncDot("online");
-    newSale._key=ref.key;
-    toast("✅ Reserva guardada. Generando PDF...");
-    setTimeout(function(){ generatePDF(newSale); },500);
-    selSeats=[]; selTrip=null; selBus=null; selPriceType="adulto"; selDeparture=null; selObs="";
+  syncUI("syncing","Guardando...");
+  var ns={tripId:selTrip.id,busId:selBus.id,seats:selSeats.slice(),seat:selSeats[0],numSeats:selSeats.length,client:client,phone:phone,email:email,payment:selPayment,senal:senal,metalico:metalico,total:totalPrecio,priceType:selPriceType,departure:selDeparture,seller:sellerForm,obs:obs,status:senal>=totalPrecio?"Pagado":"Pendiente",date:new Date().toISOString().split("T")[0],ts:Date.now()};
+  salesRef.push(ns).then(function(ref){
+    syncUI("online","En línea ✓");
+    ns._key=ref.key;
+    toast("✅ Reserva guardada! Generando PDF...");
+    setTimeout(function(){generatePDF(ns);},600);
+    selSeats=[];selTrip=null;selBus=null;selPriceType="adulto";selDeparture=null;
     showView("dashboard");
-  }).catch(function(){ setSyncDot("error"); toast("Error al guardar","error"); });
+  }).catch(function(){syncUI("error","Error");toast("❌ Error al guardar","error");});
 }
 
-// ─── SALES LIST ───────────────────────────────────────────
+// ── SALES LIST ────────────────────────────────────────────
 function renderSales(){
   var arr=salesArr().filter(function(s){
     var tm=filterTrip==="all"||s.tripId===parseInt(filterTrip);
@@ -786,32 +967,40 @@ function renderSales(){
     var sv=filterSeller==="all"||s.seller===filterSeller;
     return tm&&sm&&sv;
   });
-  var html='<div class="section-title">Historial de Reservas</div>'
-    +'<div class="filter-row"><div class="filter-chip '+(filterTrip==="all"?"on":"off")+'" onclick="setFT(\'all\')">TODAS</div>';
-  TRIPS.forEach(function(t){var sh=t.dest.split("—")[0].trim().split(" ")[0];html+='<div class="filter-chip '+(filterTrip==t.id?"on":"off")+'" onclick="setFT(\''+t.id+'\')">'+sh+'</div>';});
-  html+='</div><div class="filter-row">';
-  ["all","Pagado","Pendiente","Cancelado"].forEach(function(s){html+='<div class="filter-chip '+(filterStatus===s?"on":"off")+'" onclick="setFS(\''+s+'\')">'+(s==="all"?"TODOS":s.toUpperCase())+'</div>';});
-  html+='</div><div class="filter-row">';
-  [{id:"all",l:"👥 TODOS"},{id:"jose",l:"🔵 JOSE"},{id:"cris",l:"🟣 CRIS"}].forEach(function(o){html+='<div class="filter-chip '+(filterSeller===o.id?"on":"off")+'" onclick="setFV(\''+o.id+'\')">'+o.l+'</div>';});
-  html+='</div>';
-  if(!arr.length){html+='<div class="empty">Sin reservas para este filtro</div>';return html;}
+  var html='<div class="sec-header"><span class="sec-icon">📋</span><span class="sec-title">Reservas</span><span class="sec-badge">'+arr.length+'</span></div>'
+    +'<div class="filter-scroll">'
+    +'<button class="filter-pill '+(filterTrip==="all"?"active":"")+'" onclick="setFT(\'all\')">✈️ Todos</button>';
+  TRIPS.forEach(function(t){html+='<button class="filter-pill '+(filterTrip==t.id?"active":"")+'" onclick="setFT(\''+t.id+'\')">'+t.emoji+' '+t.dest+'</button>';});
+  html+='</div><div class="filter-scroll">'
+    +'<button class="filter-pill '+(filterStatus==="all"?"active":"")+'" onclick="setFS(\'all\')">Todos</button>'
+    +'<button class="filter-pill '+(filterStatus==="Pagado"?"active":"")+'" onclick="setFS(\'Pagado\')">✓ Pagados</button>'
+    +'<button class="filter-pill '+(filterStatus==="Pendiente"?"active":"")+'" onclick="setFS(\'Pendiente\')">⏳ Pendientes</button>'
+    +'<button class="filter-pill '+(filterStatus==="Cancelado"?"active":"")+'" onclick="setFS(\'Cancelado\')">✕ Cancelados</button>'
+    +'</div><div class="filter-scroll">'
+    +'<button class="filter-pill '+(filterSeller==="all"?"active":"")+'" onclick="setFV(\'all\')">👥 Todos</button>'
+    +'<button class="filter-pill '+(filterSeller==="jose"?"active":"")+'" onclick="setFV(\'jose\')">🔵 Jose Ariel</button>'
+    +'<button class="filter-pill '+(filterSeller==="cris"?"active":"")+'" onclick="setFV(\'cris\')">🟣 Cris</button>'
+    +'</div>';
+  if(!arr.length){
+    html+='<div class="empty-state"><div class="empty-emoji">🔍</div><div class="empty-text">Sin reservas</div><div class="empty-sub">No hay reservas para este filtro</div></div>';
+    return html;
+  }
   arr.forEach(function(s){
     var t=getTrip(s.tripId),b=getBus(s.busId);
     var seats=Array.isArray(s.seats)?s.seats:[s.seat];
-    var dep=getDepartureInfo(s.departure);
-    html+='<div class="sale-row" onclick="openDetail(\''+s._key+'\')">'
-      +'<div style="flex:1">'
-      +'<div style="display:flex;gap:5px;align-items:center;margin-bottom:2px;flex-wrap:wrap">'
-      +'<span style="font-size:10px;color:#E8A838;font-family:monospace">#'+s._key.substr(-6).toUpperCase()+'</span>'
-      +bdg(s.status,stColor(s.status))
-      +sellerTag(s.seller)
+    var dep=getD(s.departure);
+    var stClass=s.status==="Pagado"?"pagado":s.status==="Pendiente"?"pendiente":"cancelado";
+    var bgAvatar=s.seller==="jose"?"#DBEAFE":s.seller==="cris"?"#F3E8FF":"#F0F4FF";
+    html+='<div class="sale-card '+stClass+'" onclick="openDetail(\''+s._key+'\')">'
+      +'<div class="sale-avatar" style="background:'+bgAvatar+'">'+t.emoji+'</div>'
+      +'<div class="sale-info">'
+      +'<div class="sale-name">'+s.client+'</div>'
+      +'<div class="sale-dest">'+t.dest+' · '+b.name+' · '+dep.icon+dep.name+' · '+seats.length+'pax</div>'
+      +'<div class="sale-meta">'+stBadge(s.status)+selBadge(s.seller)+'<span class="badge badge-seats">🪑'+seats.length+'</span></div>'
       +'</div>'
-      +'<div style="font-size:12px;color:#F0EDE6">'+s.client+'</div>'
-      +'<div style="font-size:9px;color:#6B6660">'+t.dest.split("—")[0].trim()+' · '+b.name+' · '+dep.icon+dep.name+' · '+seats.length+'pax</div>'
-      +'</div>'
-      +'<div style="text-align:right;flex-shrink:0">'
-      +'<div style="font-size:10px;color:#E8A838">Señal: €'+s.senal+'</div>'
-      +'<div style="font-size:10px;color:#22c55e">Bus: €'+s.metalico+'</div>'
+      +'<div class="sale-amounts">'
+      +'<div class="sale-senal">€'+s.senal+'</div>'
+      +'<div class="sale-resto">€'+s.metalico+' pdte</div>'
       +'</div></div>';
   });
   return html;
@@ -821,119 +1010,103 @@ function setFS(v){filterStatus=v;render();}
 function setFV(v){filterSeller=v;render();}
 function openDetail(key){detailKey=key;showView("detail",true);}
 
-// ─── DETAIL ───────────────────────────────────────────────
+// ── DETAIL ────────────────────────────────────────────────
 function renderDetail(){
-  var s=sales[detailKey]; if(!s)return "";
+  var s=sales[detailKey];if(!s)return "";
   var t=getTrip(s.tripId),b=getBus(s.busId);
   var seats=Array.isArray(s.seats)?s.seats:[s.seat];
-  var dep=getDepartureInfo(s.departure);
-  var seller=SELLERS[s.seller]||{name:"—",emoji:"👤"};
+  var dep=getD(s.departure);
+  var seller=SELLERS[s.seller]||{name:"—",emoji:"👤",color:"#64748B"};
   var hora=t?t.salidas[s.departure]||"--:--":"--:--";
-  var html='<button class="back-btn" onclick="showView(\'sales\')">← Volver</button>'
-    +'<div class="card" style="border-color:'+t.color+'44">'
-    +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px">'
-    +'<span style="font-family:monospace;font-size:12px;color:#E8A838">#'+detailKey.substr(-6).toUpperCase()+'</span>'
-    +'<div style="display:flex;gap:4px">'+bdg(s.status,stColor(s.status))+sellerTag(s.seller)+'</div></div>'
-    +'<div style="font-size:17px;margin-bottom:2px">'+s.client+'</div>'
-    +'<div style="font-size:10px;color:#8B8680;margin-bottom:9px">📞 '+s.phone+(s.email?' ✉ '+s.email:'')+'</div>'
-    +'<div class="divider"></div>'
+  var html='<button class="back-btn" onclick="showView(\'sales\')">← Volver a reservas</button>'
+    +'<div class="detail-hero" style="background:linear-gradient(135deg,'+t.color+','+t.color+'CC)">'
+    +'<div class="detail-localizador">RESERVA #'+detailKey.substr(-8).toUpperCase()+'</div>'
+    +'<div class="detail-name">'+s.client+'</div>'
+    +'<div class="detail-contact">📞 '+s.phone+(s.email?' · ✉️ '+s.email:'')+'</div>'
     +'<div class="detail-grid">'
-    +'<div><div class="detail-key">Destino</div><div class="detail-val">'+t.dest.split("—")[0].trim()+'</div></div>'
-    +'<div><div class="detail-key">Fecha</div><div class="detail-val">'+t.day+' '+fmtD(t.date)+'</div></div>'
-    +'<div><div class="detail-key">Bus</div><div class="detail-val">'+b.name+'</div></div>'
-    +'<div><div class="detail-key">Plaza'+(seats.length>1?'s':'')+'</div><div class="detail-val">'+seats.sort(function(a,b){return a-b;}).join(", ")+'</div></div>'
-    +'<div><div class="detail-key">Salida</div><div class="detail-val">'+dep.icon+' '+dep.name+' '+hora+'h</div></div>'
-    +'<div><div class="detail-key">Vendedor</div><div class="detail-val">'+seller.emoji+' '+seller.name+'</div></div>'
-    +'<div><div class="detail-key">Total</div><div class="detail-val">€'+s.total+'</div></div>'
-    +'<div><div class="detail-key">Tipo</div><div class="detail-val">'+(s.priceType==="nino"?"Niño":"Adulto")+'</div></div>'
-    +'</div></div>'
-    +'<div class="senal-box">'
-    +'<div class="senal-title">💰 Mi señal</div>'
-    +'<div style="font-size:24px;font-weight:bold;color:#E8A838">€'+s.senal+'</div>'
-    +'<div style="font-size:10px;color:#8B8680;margin-top:2px">Pagado · '+s.payment+'</div>'
+    +'<div class="detail-item"><div class="detail-item-key">Destino</div><div class="detail-item-val">'+t.emoji+' '+t.dest+'</div></div>'
+    +'<div class="detail-item"><div class="detail-item-key">Fecha</div><div class="detail-item-val">'+t.day+' '+fmtD(t.date)+'</div></div>'
+    +'<div class="detail-item"><div class="detail-item-key">Bus / Plazas</div><div class="detail-item-val">'+b.name+' · '+seats.sort(function(a,b){return a-b;}).join(",")+'</div></div>'
+    +'<div class="detail-item"><div class="detail-item-key">Salida</div><div class="detail-item-val">'+dep.icon+' '+dep.name+' '+hora+'h</div></div>'
+    +'<div class="detail-item"><div class="detail-item-key">Tipo</div><div class="detail-item-val">'+(s.priceType==="nino"?"👶 Niño":"🧑 Adulto")+'</div></div>'
+    +'<div class="detail-item"><div class="detail-item-key">Vendedor</div><div class="detail-item-val">'+seller.emoji+' '+seller.name+'</div></div>'
     +'</div>'
-    +'<div class="metalico-box">'
-    +'<div class="metalico-title">💵 A pagar en metálico al subir al bus</div>'
+    +'<div style="margin-top:10px">'+stBadge(s.status)+'</div>'
+    +'</div>'
+
+    +'<div class="senal-card">'
+    +'<div class="senal-card-title">💰 Señal pagada</div>'
+    +'<div class="senal-amount">€'+s.senal+'</div>'
+    +'<div style="font-size:12px;font-weight:700;color:#92400E;margin-top:4px">'+s.payment+' · Total billete: €'+s.total+'</div>'
+    +'</div>'
+
+    +'<div class="metalico-card">'
+    +'<div class="metalico-card-title">💵 A pagar en metálico al subir al bus</div>'
     +'<div class="metalico-amount">€'+s.metalico+'</div>'
-    +'<div style="font-size:11px;color:#aaa;margin-top:4px;font-weight:bold">'+s.client+' · 📞 '+s.phone+'</div>'
-    +'<div style="font-size:10px;color:#8B8680">'+b.name+' · '+dep.full+' · '+hora+'h</div>'
+    +'<div style="font-size:12px;font-weight:700;color:#065F46;margin-top:4px">'+s.client+' · 📞 '+s.phone+'</div>'
+    +'<div style="font-size:11px;font-weight:600;color:#047857;margin-top:2px">'+b.name+' · '+dep.full+' · '+hora+'h · '+t.day+' '+fmtD(t.date)+'</div>'
     +'</div>';
+
   if(s.obs&&s.obs.trim()){
-    html+='<div class="card" style="margin-top:10px">'
-      +'<div class="detail-key" style="margin-bottom:5px">OBSERVACIONES</div>'
-      +'<div class="obs-box">'+s.obs+'</div>'
-      +'</div>';
+    html+='<div class="info-card"><div class="info-card-title">📌 Observaciones</div><div class="obs-display">'+s.obs+'</div></div>';
   }
+
   html+='<div class="action-row">'
-    +'<button class="btn btn-pdf" onclick="regeneratePDF(\''+detailKey+'\')">📄 PDF</button>';
+    +'<button class="btn-purple" onclick="regenPDF(\''+detailKey+'\')">📄 PDF</button>';
   if(s.status!=="Cancelado"){
-    if(s.status!=="Pagado") html+='<button class="btn btn-green" onclick="updStatus(\''+detailKey+'\',\'Pagado\')">✓ Pagado</button>';
-    if(s.status!=="Pendiente") html+='<button class="btn btn-amber" onclick="updStatus(\''+detailKey+'\',\'Pendiente\')">⏳ Pdte</button>';
-    html+='<button class="btn btn-red" onclick="updStatus(\''+detailKey+'\',\'Cancelado\')">✕</button>';
+    if(s.status!=="Pagado") html+='<button class="btn-green" onclick="updStatus(\''+detailKey+'\',\'Pagado\')">✓ Pagado</button>';
+    if(s.status!=="Pendiente") html+='<button class="btn-amber" onclick="updStatus(\''+detailKey+'\',\'Pendiente\')">⏳ Pdte</button>';
+    html+='<button class="btn-red" onclick="updStatus(\''+detailKey+'\',\'Cancelado\')">✕ Cancelar</button>';
   }
   html+='</div>';
   return html;
 }
+function regenPDF(key){var s=Object.assign({},sales[key]);s._key=key;generatePDF(s);}
+function updStatus(key,status){syncUI("syncing","Guardando...");db.ref("sales/"+key).update({status:status}).then(function(){syncUI("online","En línea ✓");toast("Estado: "+status);showView("detail",true);}).catch(function(){toast("Error","error");});}
 
-function regeneratePDF(key){
-  var s=Object.assign({},sales[key]); s._key=key;
-  generatePDF(s);
-}
-
-function updStatus(key,status){
-  setSyncDot("syncing");
-  db.ref("sales/"+key).update({status:status}).then(function(){
-    setSyncDot("online"); toast("Estado: "+status); showView("detail",true);
-  }).catch(function(){toast("Error","error");});
-}
-
-// ─── PROFILE ──────────────────────────────────────────────
+// ── PROFILE ──────────────────────────────────────────────
 function renderProfile(){
-  var arr=salesArr();
-  var html='<div class="section-title">Perfiles de vendedores</div>';
+  var html='<div class="sec-header"><span class="sec-icon">👤</span><span class="sec-title">Perfiles</span></div>';
   Object.values(SELLERS).forEach(function(seller){
-    var myArr=arr.filter(function(s){return s.seller===seller.id;});
-    var active=myArr.filter(function(s){return s.status!=="Cancelado";});
+    var arr=salesArr().filter(function(s){return s.seller===seller.id;});
+    var active=arr.filter(function(s){return s.status!=="Cancelado";});
     var totalSenal=active.reduce(function(a,s){return a+(s.senal||0);},0);
     var totalMet=active.reduce(function(a,s){return a+(s.metalico||0);},0);
-    var totalRes=active.length;
+    var totalPlazas=active.reduce(function(a,s){var ss=Array.isArray(s.seats)?s.seats:[s.seat];return a+ss.length;},0);
     var pagadas=active.filter(function(s){return s.status==="Pagado";}).length;
     var pendientes=active.filter(function(s){return s.status==="Pendiente";}).length;
-    var totalPlazas=active.reduce(function(a,s){var seats=Array.isArray(s.seats)?s.seats:[s.seat];return a+seats.length;},0);
-    html+='<div class="profile-card">'
-      +'<div class="profile-avatar">'+seller.emoji+'</div>'
-      +'<div class="profile-name">'+seller.name+'</div>'
-      +'<div class="profile-role">Vendedor · Yo Me Voy Excursiones</div>'
-      +'<div class="profile-stats">'
-      +'<div class="profile-stat"><div class="profile-stat-num" style="color:'+seller.color+'">€'+totalSenal+'</div><div class="profile-stat-label">Señales</div></div>'
-      +'<div class="profile-stat"><div class="profile-stat-num" style="color:#22c55e">€'+totalMet+'</div><div class="profile-stat-label">Pendiente</div></div>'
-      +'<div class="profile-stat"><div class="profile-stat-num" style="color:#F0EDE6">'+totalPlazas+'</div><div class="profile-stat-label">Plazas</div></div>'
-      +'<div class="profile-stat"><div class="profile-stat-num" style="color:'+seller.color+'">'+totalRes+'</div><div class="profile-stat-label">Reservas</div></div>'
-      +'<div class="profile-stat"><div class="profile-stat-num" style="color:#22c55e">'+pagadas+'</div><div class="profile-stat-label">Pagadas</div></div>'
-      +'<div class="profile-stat"><div class="profile-stat-num" style="color:#f59e0b">'+pendientes+'</div><div class="profile-stat-label">Pendientes</div></div>'
-      +'</div>'
-      // Recent sales
-      +'<div style="margin-top:12px;text-align:left">'
-      +'<div style="font-size:9px;color:#E8A838;letter-spacing:2px;text-transform:uppercase;margin-bottom:7px">Últimas reservas</div>';
-    var recent=myArr.slice(0,4);
-    if(!recent.length) html+='<div style="font-size:11px;color:#6B6660;text-align:center;padding:10px">Sin reservas aún</div>';
+    html+='<div class="profile-hero" style="background:'+seller.grad+'">'
+      +'<div class="profile-avatar-big">'+seller.emoji+'</div>'
+      +'<div class="profile-hero-name">'+seller.name+'</div>'
+      +'<div class="profile-hero-role">Vendedor · Yo Me Voy Excursiones</div>'
+      +'<div class="profile-stats-grid">'
+      +'<div class="profile-stat-card"><div class="profile-stat-num">€'+totalSenal+'</div><div class="profile-stat-lbl">Señales</div></div>'
+      +'<div class="profile-stat-card"><div class="profile-stat-num">€'+totalMet+'</div><div class="profile-stat-lbl">Pendiente</div></div>'
+      +'<div class="profile-stat-card"><div class="profile-stat-num">'+totalPlazas+'</div><div class="profile-stat-lbl">Plazas</div></div>'
+      +'<div class="profile-stat-card"><div class="profile-stat-num">'+active.length+'</div><div class="profile-stat-lbl">Reservas</div></div>'
+      +'<div class="profile-stat-card"><div class="profile-stat-num">'+pagadas+'</div><div class="profile-stat-lbl">Pagadas</div></div>'
+      +'<div class="profile-stat-card"><div class="profile-stat-num">'+pendientes+'</div><div class="profile-stat-lbl">Pendientes</div></div>'
+      +'</div></div>'
+      +'<div class="info-card">'
+      +'<div class="info-card-title">Últimas reservas de '+seller.name+'</div>';
+    var recent=arr.slice(0,5);
+    if(!recent.length)html+='<div style="text-align:center;padding:16px;color:#94A3B8;font-size:13px;font-weight:600">Sin reservas aún 🎫</div>';
     recent.forEach(function(s){
       var t=getTrip(s.tripId);
-      var seats=Array.isArray(s.seats)?s.seats:[s.seat];
-      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04)">'
-        +'<div><div style="font-size:11px;color:#F0EDE6">'+s.client+'</div>'
-        +'<div style="font-size:9px;color:#6B6660">'+t.dest.split("—")[0].trim()+' · '+seats.length+'pax</div></div>'
-        +'<div style="text-align:right"><div style="font-size:10px;color:#E8A838">€'+s.senal+'</div>'
-        +bdg(s.status,stColor(s.status))+'</div></div>';
+      var ss=Array.isArray(s.seats)?s.seats:[s.seat];
+      html+='<div class="recent-sale-row">'
+        +'<div><div style="font-size:13px;font-weight:800;color:var(--dark)">'+s.client+'</div>'
+        +'<div style="font-size:10px;font-weight:600;color:var(--gray);margin-top:1px">'+t.emoji+' '+t.dest+' · '+ss.length+'pax</div></div>'
+        +'<div style="text-align:right">'+stBadge(s.status)+'<div style="font-size:12px;font-weight:900;color:var(--sun);margin-top:3px">€'+s.senal+'</div></div>'
+        +'</div>';
     });
-    html+='</div></div>';
+    html+='</div>';
   });
   return html;
 }
 
-// ─── INIT ─────────────────────────────────────────────────
+// ── INIT ─────────────────────────────────────────────────
 buildTripsList();
-sellerForm = "jose";
 </script>
 </body>
 </html>
